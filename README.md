@@ -211,26 +211,3 @@ mvn test
 
 ---
 
-## Doğrulama Kontrol Listesi
-
-Uygulama çalıştırıldıktan sonra şunları doğrulayın:
-
-- [ ] `http://localhost:8080` → `login.xhtml`'e yönlendirme
-- [ ] `admin / admin123` ile giriş yapılabilir
-- [ ] Şirket listesi 10 demo kayıtla yüklenir
-- [ ] Kolon filtreleme çalışır (filtre satırına yazın)
-- [ ] Kolon sıralama çalışır (başlıklara tıklayın)
-- [ ] "New Company" butonu dialog açar
-- [ ] Kaydetme yeni kayıt oluşturur ve dialog kapanır
-- [ ] Düzenleme mevcut veriyi dialog'a yükler
-- [ ] Silme onay dialog'u gösterir, ardından kaydı siler
-- [ ] Growl bildirimleri tüm işlemlerde görünür
-- [ ] Excel butonu `.xlsx` dosyası indirir
-- [ ] PDF butonu `.pdf` dosyası indirir
-- [ ] Dashboard KPI kartlarında sayılar görünür
-- [ ] Dashboard'da donut ve bar grafikleri çalışır
-- [ ] "Logout" linki oturumu sonlandırır ve login'e döner
-- [ ] `http://localhost:8080/h2-console` erişilebilir
-
----
-
