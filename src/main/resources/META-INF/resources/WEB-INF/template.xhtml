@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+    <f:facet name="first">
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </f:facet>
+    <title>OSB Management Panel — <ui:insert name="pageTitle">Dashboard</ui:insert></title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+
+<h:body styleClass="layout-wrapper">
+
+    <p:menubar styleClass="top-menubar" style="border-radius:0; border-left:none; border-right:none; border-top:none;">
+        <f:facet name="start">
+            <span class="menubar-brand">
+                <i class="pi pi-building" style="margin-right:8px;"/>
+                OSB Management Panel
+            </span>
+        </f:facet>
+        <p:menuitem value="Dashboard"    url="/dashboard.xhtml" icon="pi pi-home"/>
+        <p:menuitem value="Companies"    url="/index.xhtml"     icon="pi pi-building"/>
+        <f:facet name="end">
+            <p:link value="Logout" href="/logout" styleClass="p-button p-button-text p-button-sm">
+                <span class="pi pi-sign-out" style="margin-right:4px;"/>
+            </p:link>
+        </f:facet>
+    </p:menubar>
+
+    <div class="layout-content">
+        <ui:insert name="content"/>
+    </div>
+
+</h:body>
+</html>

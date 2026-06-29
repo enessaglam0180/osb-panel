@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+    <title>OSB Panel — Login</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        body { background: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: var(--font-family); }
+        .login-container { width: 100%; max-width: 400px; padding: 1rem; }
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-header .pi { font-size: 2.5rem; color: var(--primary-color); }
+        .login-header h2 { margin: 0.5rem 0 0.25rem; color: #1e293b; font-size: 1.5rem; }
+        .login-header p { color: #64748b; margin: 0; font-size: 0.9rem; }
+        .login-field { margin-bottom: 1.25rem; }
+        .login-field label { display: block; font-weight: 500; margin-bottom: 0.4rem; color: #374151; font-size: 0.9rem; }
+        .login-field .p-inputtext { width: 100%; }
+        .error-msg { background: #fee2e2; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; }
+        .success-msg { background: #dcfce7; color: #15803d; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; }
+    </style>
+</h:head>
+
+<h:body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="pi pi-building"/>
+            <h2>OSB Management Panel</h2>
+            <p>Organized Industrial Zone Information System</p>
+        </div>
+
+        <p:card>
+            <form id="loginForm" action="/login" method="post">
+
+                <h:panelGroup rendered="#{not empty param['error']}">
+                    <div class="error-msg">
+                        <i class="pi pi-exclamation-circle"/>
+                        Invalid username or password.
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{not empty param['logout']}">
+                    <div class="success-msg">
+                        <i class="pi pi-check-circle"/>
+                        You have been logged out successfully.
+                    </div>
+                </h:panelGroup>
+
+                <div class="login-field">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text"
+                           class="p-inputtext p-component" placeholder="Enter username"
+                           autocomplete="username"/>
+                </div>
+
+                <div class="login-field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password"
+                           class="p-inputtext p-component" placeholder="Enter password"
+                           autocomplete="current-password"/>
+                </div>
+
+                <button type="submit" class="p-button p-component"
+                        style="width:100%; margin-top:0.5rem; justify-content:center;">
+                    <span class="p-button-icon p-button-icon-left pi pi-sign-in"></span>
+                    <span class="p-button-label">Sign In</span>
+                </button>
+
+            </form>
+
+            <f:facet name="footer">
+                <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin:0;">
+                    Default: admin / admin123
+                </p>
+            </f:facet>
+        </p:card>
+    </div>
+</h:body>
+</html>

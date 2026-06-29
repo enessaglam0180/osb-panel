@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">Companies</ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Industrial Companies</h1>
+                    <p class="page-subtitle">Manage registered companies in the organized industrial zone.</p>
+                </div>
+                <div class="page-actions">
+                    <p:commandButton value="New Company"
+                                     icon="pi pi-plus"
+                                     styleClass="p-button-sm"
+                                     actionListener="#{sanayiciBean.prepareNew()}"
+                                     oncomplete="PF('recordDialog').show()"
+                                     update=":mainForm:dialogContent"
+                                     process="@this"/>
+                </div>
+            </div>
+
+            <!-- DataTable -->
+            <p:card>
+                <p:dataTable id="dt"
+                             var="s"
+                             value="#{sanayiciBean.sanayiciler}"
+                             paginator="true"
+                             rows="10"
+                             rowsPerPageTemplate="10,20,50"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             currentPageReportTemplate="Showing {startRecord}-{endRecord} of {totalRecords} records"
+                             filterDisplay="row"
+                             sortMode="multiple"
+                             widgetVar="dt"
+                             emptyMessage="No records found."
+                             styleClass="p-datatable-sm"
+                             rowHover="true">
+
+                    <f:facet name="header">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Company Registry</span>
+                            <div style="display:flex; gap:8px;">
+                                <p:commandButton value="Excel"
+                                                 icon="pi pi-file-excel"
+                                                 styleClass="p-button-sm p-button-outlined p-button-success"
+                                                 ajax="false">
+                                    <p:dataExporter type="xlsx"
+                                                    target="dt"
+                                                    fileName="osb-companies"
+                                                    pageOnly="false"/>
+                                </p:commandButton>
+                                <p:commandButton value="PDF"
+                                                 icon="pi pi-file-pdf"
+                                                 styleClass="p-button-sm p-button-outlined p-button-danger"
+                                                 ajax="false">
+                                    <p:dataExporter type="pdf"
+                                                    target="dt"
+                                                    fileName="osb-companies"
+                                                    pageOnly="false"/>
+                                </p:commandButton>
+                                <p:commandButton icon="pi pi-refresh"
+                                                 styleClass="p-button-sm p-button-text"
+                                                 actionListener="#{sanayiciBean.load()}"
+                                                 update="mainForm"
+                                                 title="Refresh"/>
+                            </div>
+                        </div>
+                    </f:facet>
+
+                    <p:column headerText="Company Name"
+                              field="companyName"
+                              filterBy="#{s.companyName}"
+                              filterMatchMode="contains"
+                              sortBy="#{s.companyName}"
+                              style="min-width:200px;">
+                        <h:outputText value="#{s.companyName}"/>
+                    </p:column>
+
+                    <p:column headerText="Tax No"
+                              field="taxNumber"
+                              filterBy="#{s.taxNumber}"
+                              filterMatchMode="contains"
+                              style="width:130px;">
+                        <h:outputText value="#{s.taxNumber}"/>
+                    </p:column>
+
+                    <p:column headerText="Contact Person"
+                              field="contactPerson"
+                              filterBy="#{s.contactPerson}"
+                              filterMatchMode="contains"
+                              style="min-width:150px;">
+                        <h:outputText value="#{s.contactPerson}"/>
+                    </p:column>
+
+                    <p:column headerText="Sector"
+                              field="sector"
+                              filterBy="#{s.sector}"
+                              filterMatchMode="contains"
+                              style="width:130px;">
+                        <h:outputText value="#{s.sector}"/>
+                    </p:column>
+
+                    <p:column headerText="Plot (m²)"
+                              field="plotSizeM2"
+                              sortBy="#{s.plotSizeM2}"
+                              style="width:110px; text-align:right;">
+                        <h:outputText value="#{s.plotSizeM2}">
+                            <f:convertNumber groupingUsed="true" maxFractionDigits="0"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Status"
+                              field="status"
+                              filterBy="#{s.status}"
+                              filterMatchMode="exact"
+                              style="width:130px; text-align:center;">
+                        <p:tag value="#{s.status}"
+                               severity="#{s.status == 'ACTIVE' ? 'success' : s.status == 'PASSIVE' ? 'secondary' : 'warn'}"/>
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('dt').filter()" styleClass="p-column-filter" style="width:100%">
+                                <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{sanayiciBean.statusValues}" var="st"
+                                               itemLabel="#{st}" itemValue="#{st}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                    </p:column>
+
+                    <p:column headerText="Registered"
+                              field="createdAt"
+                              sortBy="#{s.createdAt}"
+                              style="width:140px;">
+                        <h:outputText value="#{s.createdAt}">
+                            <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column style="width:100px; text-align:center;" exportable="false">
+                        <f:facet name="header">Actions</f:facet>
+                        <p:commandButton icon="pi pi-pencil"
+                                         styleClass="p-button-rounded p-button-text p-button-sm"
+                                         title="Edit"
+                                         actionListener="#{sanayiciBean.prepareEdit(s)}"
+                                         oncomplete="PF('recordDialog').show()"
+                                         update=":mainForm:dialogContent :mainForm:recordDialog"
+                                         process="@this"/>
+                        <p:commandButton icon="pi pi-trash"
+                                         styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
+                                         title="Delete"
+                                         actionListener="#{sanayiciBean.delete(s)}"
+                                         update="mainForm"
+                                         process="@this">
+                            <p:confirm header="Confirm Deletion"
+                                       message="Are you sure you want to delete '#{s.companyName}'?"
+                                       icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+
+                </p:dataTable>
+            </p:card>
+
+            <!-- Record Dialog -->
+            <p:dialog id="recordDialog"
+                      header="#{sanayiciBean.editMode ? 'Edit Company' : 'New Company'}"
+                      widgetVar="recordDialog"
+                      modal="true"
+                      resizable="false"
+                      width="520"
+                      styleClass="record-dialog">
+
+                <p:outputPanel id="dialogContent">
+                    <h:panelGrid columns="2" styleClass="dialog-grid"
+                                 rendered="#{sanayiciBean.selected ne null}">
+
+                        <p:outputLabel for="companyName" value="Company Name *"/>
+                        <p:inputText id="companyName"
+                                     value="#{sanayiciBean.selected.companyName}"
+                                     required="true"
+                                     requiredMessage="Company name is required."
+                                     maxlength="120"/>
+
+                        <p:outputLabel for="taxNumber" value="Tax Number"/>
+                        <p:inputText id="taxNumber"
+                                     value="#{sanayiciBean.selected.taxNumber}"
+                                     maxlength="11"
+                                     placeholder="10 or 11 digits"/>
+
+                        <p:outputLabel for="contactPerson" value="Contact Person"/>
+                        <p:inputText id="contactPerson"
+                                     value="#{sanayiciBean.selected.contactPerson}"
+                                     maxlength="80"/>
+
+                        <p:outputLabel for="phone" value="Phone"/>
+                        <p:inputMask id="phone"
+                                     value="#{sanayiciBean.selected.phone}"
+                                     mask="(999) 999 9999"/>
+
+                        <p:outputLabel for="email" value="E-mail"/>
+                        <p:inputText id="email"
+                                     value="#{sanayiciBean.selected.email}"
+                                     maxlength="100"
+                                     placeholder="company@example.com"/>
+
+                        <p:outputLabel for="sector" value="Sector"/>
+                        <p:selectOneMenu id="sector"
+                                         value="#{sanayiciBean.selected.sector}"
+                                         style="width:100%">
+                            <f:selectItem itemLabel="— Select —" itemValue=""/>
+                            <f:selectItem itemLabel="Textile"     itemValue="Textile"/>
+                            <f:selectItem itemLabel="Food"        itemValue="Food"/>
+                            <f:selectItem itemLabel="Metal"       itemValue="Metal"/>
+                            <f:selectItem itemLabel="Chemistry"   itemValue="Chemistry"/>
+                            <f:selectItem itemLabel="Plastic"     itemValue="Plastic"/>
+                            <f:selectItem itemLabel="Machinery"   itemValue="Machinery"/>
+                            <f:selectItem itemLabel="Electronics" itemValue="Electronics"/>
+                            <f:selectItem itemLabel="Furniture"   itemValue="Furniture"/>
+                            <f:selectItem itemLabel="Glass"       itemValue="Glass"/>
+                            <f:selectItem itemLabel="Rubber"      itemValue="Rubber"/>
+                            <f:selectItem itemLabel="Other"       itemValue="Other"/>
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="plotSize" value="Plot Size (m²)"/>
+                        <p:inputNumber id="plotSize"
+                                       value="#{sanayiciBean.selected.plotSizeM2}"
+                                       minValue="0"
+                                       maxValue="9999999"
+                                       decimalPlaces="0"/>
+
+                        <p:outputLabel for="status" value="Status"/>
+                        <p:selectOneMenu id="status"
+                                         value="#{sanayiciBean.selected.status}"
+                                         style="width:100%">
+                            <f:selectItems value="#{sanayiciBean.statusValues}" var="st"
+                                           itemLabel="#{st}" itemValue="#{st}"/>
+                        </p:selectOneMenu>
+
+                    </h:panelGrid>
+
+                    <p:messages showDetail="true" closable="true" style="margin-top:1rem;"/>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Save"
+                                     icon="pi pi-check"
+                                     actionListener="#{sanayiciBean.save()}"
+                                     update="dialogContent :mainForm:dt"
+                                     process="@form"
+                                     styleClass="p-button-sm"/>
+                    <p:commandButton value="Cancel"
+                                     icon="pi pi-times"
+                                     onclick="PF('recordDialog').hide()"
+                                     type="button"
+                                     styleClass="p-button-sm p-button-text"
+                                     style="margin-left:8px;"/>
+                </f:facet>
+            </p:dialog>
+
+            <!-- Global confirm dialog -->
+            <p:confirmDialog global="true" showEffect="fade" style="width:380px;">
+                <p:commandButton value="Delete"
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes p-button-danger p-button-sm"
+                                 icon="pi pi-check"/>
+                <p:commandButton value="Cancel"
+                                 type="button"
+                                 styleClass="ui-confirmdialog-no p-button-text p-button-sm"
+                                 icon="pi pi-times"/>
+            </p:confirmDialog>
+
+            <p:growl id="growl" autoUpdate="true" showDetail="false" life="4000"/>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

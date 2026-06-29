@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">Dashboard</ui:define>
+
+    <ui:define name="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Overview of the Organized Industrial Zone.</p>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <p:card styleClass="kpi-card">
+                <div class="kpi-body">
+                    <div class="kpi-icon kpi-icon--blue">
+                        <i class="pi pi-building"/>
+                    </div>
+                    <div>
+                        <div class="kpi-value"><h:outputText value="#{dashboardBean.totalCount}"/></div>
+                        <div class="kpi-label">Total Companies</div>
+                    </div>
+                </div>
+            </p:card>
+
+            <p:card styleClass="kpi-card">
+                <div class="kpi-body">
+                    <div class="kpi-icon kpi-icon--green">
+                        <i class="pi pi-check-circle"/>
+                    </div>
+                    <div>
+                        <div class="kpi-value" style="color:#16a34a;">
+                            <h:outputText value="#{dashboardBean.activeCount}"/>
+                        </div>
+                        <div class="kpi-label">Active</div>
+                    </div>
+                </div>
+            </p:card>
+
+            <p:card styleClass="kpi-card">
+                <div class="kpi-body">
+                    <div class="kpi-icon kpi-icon--gray">
+                        <i class="pi pi-pause-circle"/>
+                    </div>
+                    <div>
+                        <div class="kpi-value" style="color:#64748b;">
+                            <h:outputText value="#{dashboardBean.passiveCount}"/>
+                        </div>
+                        <div class="kpi-label">Passive</div>
+                    </div>
+                </div>
+            </p:card>
+
+            <p:card styleClass="kpi-card">
+                <div class="kpi-body">
+                    <div class="kpi-icon kpi-icon--amber">
+                        <i class="pi pi-exclamation-triangle"/>
+                    </div>
+                    <div>
+                        <div class="kpi-value" style="color:#d97706;">
+                            <h:outputText value="#{dashboardBean.suspendedCount}"/>
+                        </div>
+                        <div class="kpi-label">Suspended</div>
+                    </div>
+                </div>
+            </p:card>
+        </div>
+
+        <!-- Active Plot KPI -->
+        <div style="margin-bottom: 1.5rem;">
+            <p:card styleClass="kpi-card" style="max-width:320px;">
+                <div class="kpi-body">
+                    <div class="kpi-icon kpi-icon--blue">
+                        <i class="pi pi-map"/>
+                    </div>
+                    <div>
+                        <div class="kpi-value">
+                            <h:outputText value="#{dashboardBean.activePlotM2}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="0"/>
+                            </h:outputText>
+                            <span style="font-size:1rem; font-weight:400; color:#64748b;"> m²</span>
+                        </div>
+                        <div class="kpi-label">Active Plot Area</div>
+                    </div>
+                </div>
+            </p:card>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="chart-grid">
+            <p:card header="Company Status Distribution" styleClass="chart-card">
+                <p:chart value="#{dashboardBean.statusChartJson}"
+                         style="height:280px;"/>
+            </p:card>
+
+            <p:card header="Total Plot Area by Status (m²)" styleClass="chart-card">
+                <p:chart value="#{dashboardBean.sectorPlotChartJson}"
+                         style="height:280px;"/>
+            </p:card>
+        </div>
+
+        <!-- Quick link -->
+        <div style="margin-top:1.5rem;">
+            <p:button value="View All Companies"
+                      icon="pi pi-arrow-right"
+                      iconPos="right"
+                      outcome="/index.xhtml"
+                      styleClass="p-button-outlined p-button-sm"/>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>
