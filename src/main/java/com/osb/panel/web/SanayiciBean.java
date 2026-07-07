@@ -51,7 +51,7 @@ public class SanayiciBean implements Serializable {
             service.save(selected);
             load();
             addMessage(FacesMessage.SEVERITY_INFO,
-                       editMode ? "Record updated successfully." : "Record created successfully.");
+                    editMode ? "Record updated successfully." : "Record created successfully.");
             PrimeFaces.current().executeScript("PF('recordDialog').hide()");
             PrimeFaces.current().ajax().update("mainForm:dt");
         } catch (Exception e) {
