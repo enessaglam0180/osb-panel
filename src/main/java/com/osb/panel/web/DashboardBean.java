@@ -1,93 +1,79 @@
 package com.osb.panel.web;
 
-import com.osb.panel.domain.Sanayici.Durum;
+import com.osb.panel.domain.Sanayici;
 import com.osb.panel.service.SanayiciService;
 import jakarta.annotation.PostConstruct;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import lombok.Getter;
+import lombok.Setter;
+import org.primefaces.PrimeFaces;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Named
 @ViewScoped
-public class DashboardBean implements Serializable {
+public class SanayiciBean implements Serializable {
 
     @Autowired
-    private SanayiciService service;
+    private transient SanayiciService service;
 
-    @Getter private String statusChartJson;
-    @Getter private String sectorPlotChartJson;
-
-    @Getter private long totalCount;
-    @Getter private long activeCount;
-    @Getter private long passiveCount;
-    @Getter private long suspendedCount;
-    @Getter private long activePlotM2;
+    @Getter private List<Sanayici> sanayiciler;
+    @Getter @Setter private Sanayici selected;
+    @Getter private boolean editMode;
 
     @PostConstruct
     public void init() {
-        totalCount     = service.countAll();
-        activeCount    = service.countByStatus(Durum.ACTIVE);
-        passiveCount   = service.countByStatus(Durum.PASSIVE);
-        suspendedCount = service.countByStatus(Durum.SUSPENDED);
-        activePlotM2   = service.sumPlotSizeByStatus(Durum.ACTIVE);
-
-        buildStatusChart();
-        buildSectorChart();
+        load();
     }
 
-    private void buildStatusChart() {
-        statusChartJson = """
-            {
-              "type": "doughnut",
-              "data": {
-                "labels": ["Active", "Passive", "Suspended"],
-                "datasets": [{
-                  "data": [%d, %d, %d],
-                  "backgroundColor": ["#22c55e", "#94a3b8", "#f59e0b"],
-                  "borderColor": ["#16a34a", "#64748b", "#d97706"],
-                  "borderWidth": 2
-                }]
-              },
-              "options": {
-                "responsive": true,
-                "maintainAspectRatio": false
-              }
-            }
-            """.formatted(activeCount, passiveCount, suspendedCount);
+    public void load() {
+        sanayiciler = service.findAll();
     }
 
-    private void buildSectorChart() {
-        long activePlot = service.sumPlotSizeByStatus(Durum.ACTIVE);
-        long passivePlot = service.sumPlotSizeByStatus(Durum.PASSIVE);
-        long suspendedPlot = service.sumPlotSizeByStatus(Durum.SUSPENDED);
+    public void prepareNew() {
+        selected = new Sanayici();
+        editMode = false;
+    }
 
-        sectorPlotChartJson = """
-            {
-              "type": "bar",
-              "data": {
-                "labels": ["Active", "Passive", "Suspended"],
-                "datasets": [{
-                  "label": "Plot Size (m²)",
-                  "data": [%d, %d, %d],
-                  "backgroundColor": ["rgba(34,197,94,0.7)", "rgba(148,163,184,0.7)", "rgba(245,158,11,0.7)"],
-                  "borderColor": ["#16a34a", "#64748b", "#d97706"],
-                  "borderWidth": 1
-                }]
-              },
-              "options": {
-                "responsive": true,
-                "maintainAspectRatio": false,
-                "plugins": {
-                  "title": {
-                    "display": true,
-                    "text": "Total Plot Area by Status (m²)"
-                  }
-                }
-              }
-            }
-            """.formatted(activePlot, passivePlot, suspendedPlot);
+    public void prepareEdit(Sanayici s) {
+        // Re-fetch from DB to get a managed/fresh entity and avoid detached entity issues
+        selected = service.findById(s.getId()).orElse(null);
+        editMode = true;
+    }
+
+    public void save() {
+        try {
+            service.save(selected);
+            load();
+            addMessage(FacesMessage.SEVERITY_INFO,
+                    editMode ? "Record updated successfully." : "Record created successfully.");
+            PrimeFaces.current().executeScript("PF('recordDialog').hide()");
+            PrimeFaces.current().ajax().update("mainForm:dt");
+        } catch (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error saving record: " + e.getMessage());
+        }
+    }
+
+    public void delete(Sanayici s) {
+        try {
+            service.deleteById(s.getId());
+            load();
+            addMessage(FacesMessage.SEVERITY_WARN, "\"" + s.getCompanyName() + "\" has been deleted.");
+        } catch (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error deleting record: " + e.getMessage());
+        }
+    }
+
+    public Sanayici.Durum[] getStatusValues() {
+        return Sanayici.Durum.values();
+    }
+
+    private void addMessage(FacesMessage.Severity severity, String summary) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, null));
     }
 }
