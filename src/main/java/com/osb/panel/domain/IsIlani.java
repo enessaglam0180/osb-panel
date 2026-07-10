@@ -15,7 +15,7 @@ public class IsIlani {
     private Long id;
 
     // Her ilanın bir sahibi (Sanayici) olmak zorunda
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sanayici_id", nullable = false)
     private Sanayici sanayici;
 

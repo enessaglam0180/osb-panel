@@ -14,11 +14,11 @@ public class Basvuru {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "is_ilani_id", nullable = false)
     private IsIlani isIlani;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "is_arayan_id", nullable = false)
     private IsArayan isArayan;
 

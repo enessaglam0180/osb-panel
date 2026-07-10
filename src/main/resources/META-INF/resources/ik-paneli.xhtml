@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">İK ve Kariyer Paneli</ui:define>
+
+    <ui:define name="content">
+        <h:form id="hrForm" enctype="multipart/form-data">
+
+            <p:growl id="messages" showDetail="false" life="4000" />
+
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">AOSB Kariyer ve İstihdam Modülü</h1>
+                    <p class="page-subtitle">Aday başvurularını alın ve İK süreçlerini yönetin.</p>
+                </div>
+            </div>
+
+            <p:card>
+                <p:tabView dynamic="true" cache="true">
+
+                    <p:tab title="Aday Başvuru Formu" icon="pi pi-user-plus">
+                        <div class="ui-fluid" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+                            <h:panelGrid columns="1" cellpadding="7" style="width: 100%;">
+
+                                <p:outputLabel for="ilan" value="Başvurulacak İlan *" />
+                                <p:selectOneMenu id="ilan" value="#{basvuruBean.secilenIlanId}" required="true" requiredMessage="Lütfen bir ilan seçin.">
+                                    <f:selectItem itemLabel="— İlan Seçiniz —" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{basvuruBean.aktifIlanlar}" var="i"
+                                                   itemLabel="#{i.baslik} (#{i.sanayici.companyName})" itemValue="#{i.id}" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel for="isim" value="Ad Soyad *" />
+                                <p:inputText id="isim" value="#{basvuruBean.adSoyad}" required="true" requiredMessage="Ad Soyad zorunludur." />
+
+                                <p:outputLabel for="email" value="E-posta *" />
+                                <p:inputText id="email" value="#{basvuruBean.eposta}" required="true" type="email" />
+
+                                <p:outputLabel for="tel" value="Telefon" />
+                                <p:inputMask id="tel" value="#{basvuruBean.telefon}" mask="(999) 999 9999" />
+
+                                <p:outputLabel for="meslek" value="Meslek / Uzmanlık" />
+                                <p:inputText id="meslek" value="#{basvuruBean.meslek}" placeholder="Örn: CNC Operatörü" />
+
+                                <p:outputLabel value="CV Yükle (PDF) *" />
+                                <p:fileUpload value="#{basvuruBean.cvDosyasi}" mode="simple" skinSimple="true" accept=".pdf" />
+
+                            </h:panelGrid>
+
+                            <div style="margin-top: 20px; text-align: right;">
+                                <p:commandButton value="Başvuruyu Tamamla" action="#{basvuruBean.basvuruYap}"
+                                                 icon="pi pi-check" styleClass="p-button-success" ajax="false" />
+                            </div>
+                        </div>
+                    </p:tab>
+
+                    <p:tab title="Firma İK Paneli" icon="pi pi-users">
+
+                        <p:dataTable id="basvuruTablosu" var="b" value="#{basvuruBean.tumBasvurular}"
+                                     emptyMessage="Henüz hiçbir başvuru bulunmamaktadır."
+                                     paginator="true" rows="10" rowHover="true" styleClass="p-datatable-sm">
+
+                            <p:column headerText="Aday Adı" sortBy="#{b.isArayan.adSoyad}" filterBy="#{b.isArayan.adSoyad}" filterMatchMode="contains">
+                                <h:outputText value="#{b.isArayan.adSoyad}" style="font-weight: bold;"/>
+                                <br/>
+                                <h:outputText value="#{b.isArayan.meslek}" style="font-size: 0.85em; color: gray;"/>
+                            </p:column>
+
+                            <p:column headerText="İletişim">
+                                <h:outputText value="#{b.isArayan.eposta}" />
+                                <br/>
+                                <h:outputText value="#{b.isArayan.telefon}" />
+                            </p:column>
+
+                            <p:column headerText="Başvurulan İlan" sortBy="#{b.isIlani.baslik}" filterBy="#{b.isIlani.baslik}" filterMatchMode="contains">
+                                <h:outputText value="#{b.isIlani.baslik}" />
+                                <br/>
+                                <h:outputText value="#{b.isIlani.sanayici.companyName}" style="font-size: 0.85em; color: #007ad9;"/>
+                            </p:column>
+
+                            <p:column headerText="Tarih" sortBy="#{b.basvuruTarihi}" style="width: 120px;">
+                                <h:outputText value="#{b.basvuruTarihi}">
+                                    <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="CV İndir" style="width: 100px; text-align: center;">
+                                <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
+                                                 styleClass="ui-button-outlined ui-button-secondary rounded-button"
+                                                 ajax="false">
+                                    <p:fileDownload value="#{basvuruBean.cvIndir(b)}" />
+                                </p:commandButton>
+                            </p:column>
+
+                            <p:column headerText="Durum" style="width: 180px;">
+                                <div style="margin-bottom: 5px;">
+                                    <p:tag value="#{b.basvuruDurumu}"
+                                           severity="#{b.basvuruDurumu == 'BEKLIYOR' ? 'warning' :
+                                                       b.basvuruDurumu == 'INCELENDI' ? 'info' :
+                                                       b.basvuruDurumu == 'MULAKATA_CAGRILDI' ? 'success' : 'danger'}" />
+                                </div>
+
+                                <p:selectOneMenu value="#{b.basvuruDurumu}" style="width: 100%;">
+                                    <p:ajax listener="#{basvuruBean.durumGuncelle(b)}" update=":hrForm:messages @parent" />
+                                    <f:selectItem itemLabel="Bekliyor" itemValue="BEKLIYOR" />
+                                    <f:selectItem itemLabel="İncelendi" itemValue="INCELENDI" />
+                                    <f:selectItem itemLabel="Mülakata Çağrıldı" itemValue="MULAKATA_CAGRILDI" />
+                                    <f:selectItem itemLabel="Reddedildi" itemValue="REDDEDILDI" />
+                                </p:selectOneMenu>
+                            </p:column>
+
+                        </p:dataTable>
+
+                    </p:tab>
+                </p:tabView>
+            </p:card>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
