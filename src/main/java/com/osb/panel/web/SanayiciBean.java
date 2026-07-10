@@ -26,6 +26,10 @@ public class SanayiciBean implements Serializable {
     @Getter @Setter private Sanayici selected;
     @Getter private boolean editMode;
 
+    @Getter @Setter private String aramaKelimesi;
+
+    @Getter @Setter private List<Sanayici> filteredSanayiciler;
+
     @PostConstruct
     public void init() {
         load();
@@ -33,6 +37,12 @@ public class SanayiciBean implements Serializable {
 
     public void load() {
         sanayiciler = service.findAll();
+        aramaKelimesi = null; // Listeyi sıfırlayınca arama kutusu da temizlensin
+    }
+
+
+    public void ara() {
+        sanayiciler = service.ara(aramaKelimesi);
     }
 
     public void prepareNew() {

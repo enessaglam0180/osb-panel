@@ -31,9 +31,11 @@
 
             <!-- DataTable -->
             <p:card>
+                
                 <p:dataTable id="dt"
                              var="s"
                              value="#{sanayiciBean.sanayiciler}"
+                             filteredValue="#{sanayiciBean.filteredSanayiciler}"
                              paginator="true"
                              rows="10"
                              rowsPerPageTemplate="10,20,50"

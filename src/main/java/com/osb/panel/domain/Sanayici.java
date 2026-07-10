@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -52,6 +53,10 @@ public class Sanayici {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Durum status = Durum.ACTIVE;
+
+    // 🚀 YENİ EKLENEN KISIM: Firmanın açtığı ilanların listesi
+    @OneToMany(mappedBy = "sanayici", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<IsIlani> ilanlar;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

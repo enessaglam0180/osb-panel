@@ -49,4 +49,14 @@ public class SanayiciService {
         Long result = repository.sumPlotSizeByStatus(status);
         return result != null ? result : 0L;
     }
+
+
+    public List<Sanayici> ara(String kelime) {
+        // Kullanıcı kutuyu boş bırakıp ararsa, tüm listeyi A'dan Z'ye getir
+        if (kelime == null || kelime.trim().isEmpty()) {
+            return findAll();
+        }
+        // Doluysa veritabanına in ve filtrele
+        return repository.searchSanayici(kelime.trim());
+    }
 }
