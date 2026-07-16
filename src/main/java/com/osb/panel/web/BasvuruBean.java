@@ -45,7 +45,6 @@ public class BasvuruBean implements Serializable {
 
     @Getter private List<IsIlani> aktifIlanlar;
     @Getter private List<Basvuru> tumBasvurular;
-    @Getter private List<IsArayan> tumAdaylar;
 
     // İstatistikler
     @Getter private long bekleyenSayisi;
@@ -53,10 +52,6 @@ public class BasvuruBean implements Serializable {
     @Getter private long mulakatSayisi;
     @Getter private long redSayisi;
     @Getter private long toplamAdaySayisi;
-
-    // Filtreleme
-    @Getter @Setter private String aramaMeslek;
-    @Getter @Setter private String aramaSehir;
 
     @PostConstruct
     public void init() {
@@ -66,7 +61,6 @@ public class BasvuruBean implements Serializable {
     public void yukle() {
         aktifIlanlar = isIlaniRepository.findAll();
         tumBasvurular = basvuruRepository.findAll();
-        tumAdaylar = isArayanService.findAll();
         istatistikleriGuncelle();
     }
 
@@ -75,17 +69,7 @@ public class BasvuruBean implements Serializable {
         incelenenSayisi = basvuruRepository.countByBasvuruDurumu(Basvuru.BasvuruDurumu.INCELENDI);
         mulakatSayisi = basvuruRepository.countByBasvuruDurumu(Basvuru.BasvuruDurumu.MULAKATA_CAGRILDI);
         redSayisi = basvuruRepository.countByBasvuruDurumu(Basvuru.BasvuruDurumu.REDDEDILDI);
-        toplamAdaySayisi = tumAdaylar != null ? tumAdaylar.size() : 0;
-    }
-
-    public void adayAra() {
-        tumAdaylar = isArayanService.ara(aramaMeslek, aramaSehir);
-    }
-
-    public void filtreTemizle() {
-        aramaMeslek = null;
-        aramaSehir = null;
-        tumAdaylar = isArayanService.findAll();
+        toplamAdaySayisi = isArayanService.findAll().size();
     }
 
     // İK Yöneticisi başvuru durumunu değiştirdiğinde çalışır

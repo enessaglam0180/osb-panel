@@ -81,194 +81,112 @@
             </p:outputPanel>
 
             <p:card>
-                <!-- dynamic="true" kaldırıldı çünkü tablar arası ajax işlemlerinde sorun yaratabilir -->
-                <p:tabView>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                    <h2 style="margin:0; font-size: 1.25rem; font-weight:600; color:#334155;">Tüm Başvurular ve Aday Yönetimi</h2>
+                </div>
 
-                    <!-- ===== TAB 1: TÜM BAŞVURULAR ===== -->
-                    <p:tab title="Başvurular" icon="pi pi-inbox">
+                <p:dataTable id="basvuruTablosu" var="b" value="#{basvuruBean.tumBasvurular}"
+                    emptyMessage="Henüz hiçbir kayıt bulunmamaktadır." paginator="true" rows="15"
+                    rowHover="true" styleClass="p-datatable-sm" sortBy="#{b.basvuruTarihi}" sortOrder="descending">
 
-                        <p:dataTable id="basvuruTablosu" var="b" value="#{basvuruBean.tumBasvurular}"
-                            emptyMessage="Henüz hiçbir başvuru bulunmamaktadır." paginator="true" rows="10"
-                            rowHover="true" styleClass="p-datatable-sm">
+                    <!-- Aday Bilgisi (Ad, Meslek) -->
+                    <p:column headerText="Aday" sortBy="#{b.isArayan.adSoyad}"
+                        filterBy="#{b.isArayan.adSoyad}" filterMatchMode="contains" style="min-width: 160px;">
+                        <h:outputText value="#{b.isArayan.adSoyad}" style="font-weight: bold;" />
+                        <br />
+                        <h:outputText value="#{b.isArayan.meslek}" style="font-size: 0.85em; color: gray;" />
+                    </p:column>
 
-                            <p:column headerText="Aday Adı" sortBy="#{b.isArayan.adSoyad}"
-                                filterBy="#{b.isArayan.adSoyad}" filterMatchMode="contains">
-                                <h:outputText value="#{b.isArayan.adSoyad}" style="font-weight: bold;" />
-                                <br />
-                                <h:outputText value="#{b.isArayan.meslek}" style="font-size: 0.85em; color: gray;" />
-                            </p:column>
+                    <!-- İletişim ve Şehir -->
+                    <p:column headerText="İletişim / Şehir" filterBy="#{b.isArayan.sehir}" filterMatchMode="contains" style="width:160px;">
+                        <h:outputText value="#{b.isArayan.eposta}" />
+                        <br />
+                        <h:outputText value="#{b.isArayan.telefon} - #{b.isArayan.sehir}" style="font-size:0.85em; color:gray;" />
+                    </p:column>
 
-                            <p:column headerText="İletişim" style="width:180px;">
-                                <h:outputText value="#{b.isArayan.eposta}" />
-                                <br />
-                                <h:outputText value="#{b.isArayan.telefon}" style="font-size:0.85em; color:gray;" />
-                            </p:column>
+                    <!-- Eğitim ve Deneyim -->
+                    <p:column headerText="Eğitim / Deneyim" style="width:140px;">
+                        <h:outputText value="#{b.isArayan.egitimDurumu}" />
+                        <br />
+                        <h:outputText value="#{b.isArayan.deneyimYili} Yıl Deneyim" style="font-size:0.85em; color:gray;" rendered="#{b.isArayan.deneyimYili != null}" />
+                    </p:column>
 
-                            <p:column headerText="Başvurulan İlan" sortBy="#{b.isIlani.baslik}"
-                                filterBy="#{b.isIlani.baslik}" filterMatchMode="contains">
-                                <h:panelGroup rendered="#{b.isIlani != null}">
-                                    <h:outputText value="#{b.isIlani.baslik}" />
-                                    <br />
-                                    <h:outputText value="#{b.isIlani.sanayici.companyName}"
-                                        style="font-size: 0.85em; color: #007ad9;" />
-                                </h:panelGroup>
-                                <h:panelGroup rendered="#{b.isIlani == null}">
-                                    <p:tag value="Genel Havuz" severity="info" />
-                                </h:panelGroup>
-                            </p:column>
-
-                            <p:column headerText="Tarih" sortBy="#{b.basvuruTarihi}" style="width: 120px;">
-                                <h:outputText value="#{b.basvuruTarihi}">
-                                    <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
-                                </h:outputText>
-                            </p:column>
-
-                            <p:column headerText="CV" style="width: 60px; text-align: center;">
-                                <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
-                                    styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
-                                    ajax="false" rendered="#{b.isArayan.cvDosyaYolu != null}">
-                                    <p:fileDownload value="#{basvuruBean.cvIndir(b)}" />
-                                </p:commandButton>
-                            </p:column>
-
-                            <p:column headerText="Durum" style="width: 200px;">
-                                <!-- Tag kısmı dinamik güncellenebilmesi için panele alındı -->
-                                <h:panelGroup id="durumGrup" style="display:block; margin-bottom: 5px;">
-                                    <p:tag value="#{b.basvuruDurumu}"
-                                        severity="#{b.basvuruDurumu == 'BEKLIYOR' ? 'warning' :
-                                                       b.basvuruDurumu == 'INCELENDI' ? 'info' :
-                                                       b.basvuruDurumu == 'MULAKATA_CAGRILDI' ? 'success' : 'danger'}" />
-                                    <br />
-                                    <h:outputText value="#{b.isArayan.durum}"
-                                        style="font-size: 0.85em; color: gray; display: block; margin-top: 4px;"
-                                        rendered="#{not empty b.isArayan.durum}" />
-                                </h:panelGroup>
-
-                                <p:selectOneMenu value="#{b.basvuruDurumu}" style="width: 100%;">
-                                    <!-- update kısmına durumGrup eklendi, böylece renk ve yazı anlık değişecek -->
-                                    <p:ajax listener="#{basvuruBean.durumGuncelle(b)}"
-                                        update=":hrForm:messages :hrForm:kpiPanel durumGrup :hrForm:adayHavuzTablosu" />
-                                    <f:selectItem itemLabel="Bekliyor" itemValue="BEKLIYOR" />
-                                    <f:selectItem itemLabel="İncelendi" itemValue="INCELENDI" />
-                                    <f:selectItem itemLabel="Mülakata Çağrıldı" itemValue="MULAKATA_CAGRILDI" />
-                                    <f:selectItem itemLabel="Reddedildi" itemValue="REDDEDILDI" />
-                                </p:selectOneMenu>
-                            </p:column>
-
-                            <p:column headerText="" style="width: 50px; text-align: center;">
-                                <p:commandButton icon="pi pi-trash" title="Başvuruyu Sil"
-                                    styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
-                                    actionListener="#{basvuruBean.basvuruSil(b)}"
-                                    update=":hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages" process="@this">
-                                    <p:confirm header="Emin misiniz?"
-                                        message="Bu başvuruyu silmek istediğinize emin misiniz?"
-                                        icon="pi pi-exclamation-triangle" />
-                                </p:commandButton>
-                            </p:column>
-
-                        </p:dataTable>
-                    </p:tab>
-
-                    <!-- ===== TAB 2: ADAY HAVUZU YÖNETİMİ ===== -->
-                    <p:tab title="Aday Havuzu" icon="pi pi-users">
-
-                        <!-- Arama/Filtreleme -->
-                        <div style="display:flex; gap:12px; margin-bottom:1rem; flex-wrap:wrap; align-items:flex-end;">
-                            <div>
-                                <label
-                                    style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Meslek</label>
-                                <p:inputText id="aramaMeslek" value="#{basvuruBean.aramaMeslek}"
-                                    placeholder="Meslek ara..." style="width:200px;" />
-                            </div>
-                            <div>
-                                <label
-                                    style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Şehir</label>
-                                <p:inputText id="aramaSehir" value="#{basvuruBean.aramaSehir}"
-                                    placeholder="Şehir ara..." style="width:200px;" />
-                            </div>
-                            <p:commandButton value="Ara" icon="pi pi-search" action="#{basvuruBean.adayAra}"
-                                update="adayHavuzTablosu" process="@this aramaMeslek aramaSehir"
-                                styleClass="p-button-sm" />
-                            <p:commandButton value="Temizle" icon="pi pi-filter-slash"
-                                action="#{basvuruBean.filtreTemizle}" update="adayHavuzTablosu aramaMeslek aramaSehir"
-                                process="@this" styleClass="p-button-sm p-button-outlined" />
+                    <!-- Başvurulan İlan -->
+                    <p:column headerText="Başvurulan İlan" sortBy="#{b.isIlani.baslik}"
+                        filterBy="#{b.isIlani.baslik}" filterMatchMode="contains" style="width:180px;">
+                        <h:panelGroup rendered="#{b.isIlani != null}">
+                            <h:outputText value="#{b.isIlani.baslik}" />
+                            <br />
+                            <h:outputText value="#{b.isIlani.sanayici.companyName}" style="font-size: 0.85em; color: #007ad9;" />
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{b.isIlani == null}">
+                            <p:tag value="Genel Havuz" severity="info" />
+                        </h:panelGroup>
+                        <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">
+                            <h:outputText value="#{b.basvuruTarihi}">
+                                <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                            </h:outputText>
                         </div>
+                    </p:column>
 
-                        <p:dataTable id="adayHavuzTablosu" var="aday" value="#{basvuruBean.tumAdaylar}"
-                            emptyMessage="Aday bulunamadı." paginator="true" rows="10" rowHover="true"
-                            styleClass="p-datatable-sm" sortBy="#{aday.kayitTarihi}" sortOrder="descending">
+                    <!-- Aday Notu / Durumu -->
+                    <p:column headerText="Aday Notu (Akıbet)" style="width: 160px;">
+                        <p:inputText value="#{b.isArayan.durum}" placeholder="Not veya durum..." style="width:100%;">
+                            <p:ajax event="blur" listener="#{basvuruBean.adayGuncelle(b.isArayan)}"
+                                update=":hrForm:messages" />
+                        </p:inputText>
+                    </p:column>
 
-                            <p:column headerText="Aday" sortBy="#{aday.adSoyad}" filterBy="#{aday.adSoyad}"
-                                filterMatchMode="contains" style="min-width:180px;">
-                                <h:outputText value="#{aday.adSoyad}" style="font-weight: bold;" />
-                                <br />
-                                <h:outputText value="#{aday.meslek}" style="font-size: 0.85em; color: gray;" />
-                            </p:column>
+                    <!-- Başvuru Durumu (Aşama) -->
+                    <p:column headerText="Aşama" style="width: 160px;">
+                        <h:panelGroup id="durumGrup" style="display:block; margin-bottom: 5px;">
+                            <p:tag value="#{b.basvuruDurumu}"
+                                severity="#{b.basvuruDurumu == 'BEKLIYOR' ? 'warning' :
+                                               b.basvuruDurumu == 'INCELENDI' ? 'info' :
+                                               b.basvuruDurumu == 'MULAKATA_CAGRILDI' ? 'success' : 'danger'}" />
+                        </h:panelGroup>
 
-                            <p:column headerText="İletişim" style="width:200px;">
-                                <h:outputText value="#{aday.eposta}" />
-                                <br />
-                                <h:outputText value="#{aday.telefon}" style="font-size:0.85em; color:gray;" />
-                            </p:column>
+                        <p:selectOneMenu value="#{b.basvuruDurumu}" style="width: 100%;">
+                            <p:ajax listener="#{basvuruBean.durumGuncelle(b)}"
+                                update=":hrForm:messages :hrForm:kpiPanel durumGrup" />
+                            <f:selectItem itemLabel="Bekliyor" itemValue="BEKLIYOR" />
+                            <f:selectItem itemLabel="İncelendi" itemValue="INCELENDI" />
+                            <f:selectItem itemLabel="Mülakata Çağrıldı" itemValue="MULAKATA_CAGRILDI" />
+                            <f:selectItem itemLabel="Reddedildi" itemValue="REDDEDILDI" />
+                        </p:selectOneMenu>
+                    </p:column>
 
-                            <p:column headerText="Şehir" sortBy="#{aday.sehir}" style="width:100px;">
-                                <h:outputText value="#{aday.sehir}" />
-                            </p:column>
+                    <!-- CV -->
+                    <p:column headerText="CV" style="width: 50px; text-align: center;">
+                        <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
+                            styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
+                            ajax="false" rendered="#{b.isArayan.cvDosyaYolu != null}">
+                            <p:fileDownload value="#{basvuruBean.cvIndir(b)}" />
+                        </p:commandButton>
+                    </p:column>
 
-                            <p:column headerText="Eğitim" style="width:140px;">
-                                <h:outputText value="#{aday.egitimDurumu}" />
-                            </p:column>
+                    <!-- İşlemler -->
+                    <p:column headerText="İşlemler" style="width: 80px; text-align: center;">
+                        <p:commandButton icon="pi pi-trash" title="Sadece Başvuruyu Sil"
+                            styleClass="p-button-rounded p-button-text p-button-warning p-button-sm"
+                            actionListener="#{basvuruBean.basvuruSil(b)}"
+                            update=":hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages" process="@this">
+                            <p:confirm header="Emin misiniz?"
+                                message="Sadece bu başvuruyu silmek istediğinize emin misiniz? (Aday silinmez)"
+                                icon="pi pi-exclamation-triangle" />
+                        </p:commandButton>
+                        
+                        <p:commandButton icon="pi pi-user-minus" title="Adayı Komple Sil"
+                            styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
+                            actionListener="#{basvuruBean.adaySil(b.isArayan)}"
+                            update=":hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages" process="@this">
+                            <p:confirm header="Dikkat!"
+                                message="'#{b.isArayan.adSoyad}' adayını ve yaptığı tüm başvuruları kalıcı olarak silmek istediğinize emin misiniz?"
+                                icon="pi pi-exclamation-circle" />
+                        </p:commandButton>
+                    </p:column>
 
-                            <p:column headerText="Deneyim" sortBy="#{aday.deneyimYili}"
-                                style="width:90px; text-align:center;">
-                                <h:outputText value="#{aday.deneyimYili} yıl" rendered="#{aday.deneyimYili != null}" />
-                                <h:outputText value="-" rendered="#{aday.deneyimYili == null}" style="color:#94a3b8;" />
-                            </p:column>
-
-                            <p:column headerText="Mülakat Durumu" style="width:120px; text-align:center;">
-                                <p:selectBooleanCheckbox value="#{aday.mulakataCagrildiMi}" itemLabel="Çağrıldı">
-                                    <p:ajax listener="#{basvuruBean.adayGuncelle(aday)}"
-                                        update=":hrForm:messages :hrForm:basvuruTablosu :hrForm:kpiPanel" />
-                                </p:selectBooleanCheckbox>
-                            </p:column>
-
-                            <p:column headerText="Akıbet / Durum" style="width:180px;">
-                                <p:inputText value="#{aday.durum}" placeholder="Not veya durum..." style="width:100%;">
-                                    <p:ajax event="blur" listener="#{basvuruBean.adayGuncelle(aday)}"
-                                        update=":hrForm:messages :hrForm:basvuruTablosu" />
-                                </p:inputText>
-                            </p:column>
-
-                            <p:column headerText="Kayıt Tarihi" sortBy="#{aday.kayitTarihi}" style="width:120px;">
-                                <h:outputText value="#{aday.kayitTarihi}">
-                                    <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy" />
-                                </h:outputText>
-                            </p:column>
-
-                            <p:column headerText="CV" style="width:60px; text-align:center;">
-                                <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
-                                    styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
-                                    ajax="false" rendered="#{aday.cvDosyaYolu != null}">
-                                    <p:fileDownload value="#{basvuruBean.adayCvIndir(aday)}" />
-                                </p:commandButton>
-                            </p:column>
-
-                            <p:column headerText="" style="width:60px; text-align:center;">
-                                <p:commandButton icon="pi pi-trash" title="Adayı Sil"
-                                    styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
-                                    actionListener="#{basvuruBean.adaySil(aday)}"
-                                    update=":hrForm:adayHavuzTablosu :hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages"
-                                    process="@this">
-                                    <p:confirm header="Emin misiniz?"
-                                        message="'#{aday.adSoyad}' adayını ve tüm başvurularını silmek istediğinize emin misiniz?"
-                                        icon="pi pi-exclamation-triangle" />
-                                </p:commandButton>
-                            </p:column>
-
-                        </p:dataTable>
-                    </p:tab>
-
-                </p:tabView>
+                </p:dataTable>
             </p:card>
 
             <!-- Global confirm dialog -->
