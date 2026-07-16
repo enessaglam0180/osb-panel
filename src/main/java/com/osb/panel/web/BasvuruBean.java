@@ -81,7 +81,6 @@ public class BasvuruBean implements Serializable {
         String ilanBaslik = basvuru.getIsIlani() != null ? basvuru.getIsIlani().getBaslik() : "Genel Başvuru";
         
         if (basvuru.getBasvuruDurumu() == Basvuru.BasvuruDurumu.MULAKATA_CAGRILDI) {
-            aday.setMulakataCagrildiMi(true);
             aday.setDurum("Mülakata Çağrıldı (" + ilanBaslik + ")");
         } else if (basvuru.getBasvuruDurumu() == Basvuru.BasvuruDurumu.REDDEDILDI) {
             aday.setDurum("Reddedildi (" + ilanBaslik + ")");
@@ -99,24 +98,7 @@ public class BasvuruBean implements Serializable {
     // Aday bilgilerini güncellediğinde çalışır
     public void adayGuncelle(IsArayan aday) {
         isArayanService.save(aday);
-        
-        // Senkronizasyon: Aday mülakata çağrıldıysa, beklemedeki başvurularını da Mülakata Çağrıldı yap
-        if (Boolean.TRUE.equals(aday.getMulakataCagrildiMi())) {
-            List<Basvuru> basvurular = basvuruRepository.findByIsArayanId(aday.getId());
-            boolean degisiklik = false;
-            for (Basvuru b : basvurular) {
-                if (b.getBasvuruDurumu() == Basvuru.BasvuruDurumu.BEKLIYOR || b.getBasvuruDurumu() == Basvuru.BasvuruDurumu.INCELENDI) {
-                    b.setBasvuruDurumu(Basvuru.BasvuruDurumu.MULAKATA_CAGRILDI);
-                    basvuruRepository.save(b);
-                    degisiklik = true;
-                }
-            }
-            if (degisiklik) {
-                yukle(); // Tüm listeyi güncellemek için
-            }
-        }
-        
-        addMessage(FacesMessage.SEVERITY_INFO, "Aday bilgileri güncellendi ve başvurularla senkronize edildi.");
+        addMessage(FacesMessage.SEVERITY_INFO, "Aday notu başarıyla güncellendi.");
     }
 
     // Operatör adayı siler
