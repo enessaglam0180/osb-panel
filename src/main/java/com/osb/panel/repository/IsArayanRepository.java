@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IsArayanRepository extends JpaRepository<IsArayan, Long> {
@@ -21,4 +22,6 @@ public interface IsArayanRepository extends JpaRepository<IsArayan, Long> {
     List<IsArayan> aramaYap(@Param("meslek") String meslek, @Param("sehir") String sehir);
 
     boolean existsByEposta(String eposta);
+
+    Optional<IsArayan> findByEposta(String eposta);
 }

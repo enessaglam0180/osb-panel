@@ -77,16 +77,30 @@ public class AdayBasvuruBean implements Serializable {
             // CV'yi kaydet
             String dosyaYolu = fileStorageService.cvKaydet(cvDosyasi.getFileName(), cvDosyasi.getInputStream());
 
-            // Adayı oluştur
-            IsArayan aday = new IsArayan();
-            aday.setAdSoyad(adSoyad.trim());
-            aday.setEposta(eposta.trim());
-            aday.setTelefon(telefon);
-            aday.setMeslek(meslek);
-            aday.setDeneyimYili(deneyimYili);
-            aday.setEgitimDurumu(egitimDurumu);
-            aday.setSehir(sehir);
-            aday.setCvDosyaYolu(dosyaYolu);
+            // Aynı e-posta ile kayıtlı aday var mı kontrol et
+            IsArayan aday = isArayanRepository.findByEposta(eposta.trim()).orElse(null);
+
+            if (aday != null) {
+                // Mevcut adayın bilgilerini güncelle ve yeni CV'sini kaydet
+                aday.setAdSoyad(adSoyad.trim());
+                aday.setTelefon(telefon);
+                aday.setMeslek(meslek);
+                aday.setDeneyimYili(deneyimYili);
+                aday.setEgitimDurumu(egitimDurumu);
+                aday.setSehir(sehir);
+                aday.setCvDosyaYolu(dosyaYolu);
+            } else {
+                // Yeni aday oluştur
+                aday = new IsArayan();
+                aday.setAdSoyad(adSoyad.trim());
+                aday.setEposta(eposta.trim());
+                aday.setTelefon(telefon);
+                aday.setMeslek(meslek);
+                aday.setDeneyimYili(deneyimYili);
+                aday.setEgitimDurumu(egitimDurumu);
+                aday.setSehir(sehir);
+                aday.setCvDosyaYolu(dosyaYolu);
+            }
             isArayanRepository.save(aday);
 
             // Başvuruyu oluştur
