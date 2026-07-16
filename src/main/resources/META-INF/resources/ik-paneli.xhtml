@@ -21,65 +21,68 @@
                 </div>
             </div>
 
-            <!-- KPI Kartları -->
-            <div class="kpi-grid">
-                <p:card styleClass="kpi-card">
-                    <div class="kpi-body">
-                        <div class="kpi-icon kpi-icon--blue">
-                            <i class="pi pi-users"/>
-                        </div>
-                        <div>
-                            <div class="kpi-value"><h:outputText value="#{basvuruBean.toplamAdaySayisi}"/></div>
-                            <div class="kpi-label">Toplam Aday</div>
-                        </div>
-                    </div>
-                </p:card>
-
-                <p:card styleClass="kpi-card">
-                    <div class="kpi-body">
-                        <div class="kpi-icon kpi-icon--amber">
-                            <i class="pi pi-clock"/>
-                        </div>
-                        <div>
-                            <div class="kpi-value" style="color:#d97706;">
-                                <h:outputText value="#{basvuruBean.bekleyenSayisi}"/>
+            <!-- KPI Kartları - Dinamik güncellenmesi için id eklendi ve panel içine alındı -->
+            <p:outputPanel id="kpiPanel">
+                <div class="kpi-grid">
+                    <p:card styleClass="kpi-card">
+                        <div class="kpi-body">
+                            <div class="kpi-icon kpi-icon--blue">
+                                <i class="pi pi-users"/>
                             </div>
-                            <div class="kpi-label">Bekleyen</div>
-                        </div>
-                    </div>
-                </p:card>
-
-                <p:card styleClass="kpi-card">
-                    <div class="kpi-body">
-                        <div class="kpi-icon kpi-icon--green">
-                            <i class="pi pi-check-circle"/>
-                        </div>
-                        <div>
-                            <div class="kpi-value" style="color:#16a34a;">
-                                <h:outputText value="#{basvuruBean.mulakatSayisi}"/>
+                            <div>
+                                <div class="kpi-value"><h:outputText value="#{basvuruBean.toplamAdaySayisi}"/></div>
+                                <div class="kpi-label">Toplam Aday</div>
                             </div>
-                            <div class="kpi-label">Mülakata Çağrılan</div>
                         </div>
-                    </div>
-                </p:card>
+                    </p:card>
 
-                <p:card styleClass="kpi-card">
-                    <div class="kpi-body">
-                        <div class="kpi-icon kpi-icon--gray">
-                            <i class="pi pi-times-circle"/>
-                        </div>
-                        <div>
-                            <div class="kpi-value" style="color:#ef4444;">
-                                <h:outputText value="#{basvuruBean.redSayisi}"/>
+                    <p:card styleClass="kpi-card">
+                        <div class="kpi-body">
+                            <div class="kpi-icon kpi-icon--amber">
+                                <i class="pi pi-clock"/>
                             </div>
-                            <div class="kpi-label">Reddedilen</div>
+                            <div>
+                                <div class="kpi-value" style="color:#d97706;">
+                                    <h:outputText value="#{basvuruBean.bekleyenSayisi}"/>
+                                </div>
+                                <div class="kpi-label">Bekleyen</div>
+                            </div>
                         </div>
-                    </div>
-                </p:card>
-            </div>
+                    </p:card>
+
+                    <p:card styleClass="kpi-card">
+                        <div class="kpi-body">
+                            <div class="kpi-icon kpi-icon--green">
+                                <i class="pi pi-check-circle"/>
+                            </div>
+                            <div>
+                                <div class="kpi-value" style="color:#16a34a;">
+                                    <h:outputText value="#{basvuruBean.mulakatSayisi}"/>
+                                </div>
+                                <div class="kpi-label">Mülakata Çağrılan</div>
+                            </div>
+                        </div>
+                    </p:card>
+
+                    <p:card styleClass="kpi-card">
+                        <div class="kpi-body">
+                            <div class="kpi-icon kpi-icon--gray">
+                                <i class="pi pi-times-circle"/>
+                            </div>
+                            <div>
+                                <div class="kpi-value" style="color:#ef4444;">
+                                    <h:outputText value="#{basvuruBean.redSayisi}"/>
+                                </div>
+                                <div class="kpi-label">Reddedilen</div>
+                            </div>
+                        </div>
+                    </p:card>
+                </div>
+            </p:outputPanel>
 
             <p:card>
-                <p:tabView dynamic="true" cache="true">
+                <!-- dynamic="true" kaldırıldı çünkü tablar arası ajax işlemlerinde sorun yaratabilir -->
+                <p:tabView>
 
                     <!-- ===== TAB 1: TÜM BAŞVURULAR ===== -->
                     <p:tab title="Başvurular" icon="pi pi-inbox">
@@ -120,21 +123,24 @@
                             <p:column headerText="CV" style="width: 60px; text-align: center;">
                                 <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
                                                  styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
-                                                 ajax="false">
+                                                 ajax="false"
+                                                 rendered="#{b.isArayan.cvDosyaYolu != null}">
                                     <p:fileDownload value="#{basvuruBean.cvIndir(b)}" />
                                 </p:commandButton>
                             </p:column>
 
                             <p:column headerText="Durum" style="width: 200px;">
-                                <div style="margin-bottom: 5px;">
+                                <!-- Tag kısmı dinamik güncellenebilmesi için panele alındı -->
+                                <h:panelGroup id="durumGrup" style="display:block; margin-bottom: 5px;">
                                     <p:tag value="#{b.basvuruDurumu}"
                                            severity="#{b.basvuruDurumu == 'BEKLIYOR' ? 'warning' :
                                                        b.basvuruDurumu == 'INCELENDI' ? 'info' :
                                                        b.basvuruDurumu == 'MULAKATA_CAGRILDI' ? 'success' : 'danger'}" />
-                                </div>
+                                </h:panelGroup>
 
                                 <p:selectOneMenu value="#{b.basvuruDurumu}" style="width: 100%;">
-                                    <p:ajax listener="#{basvuruBean.durumGuncelle(b)}" update=":hrForm:messages :hrForm:kpiPanel" />
+                                    <!-- update kısmına durumGrup eklendi, böylece renk ve yazı anlık değişecek -->
+                                    <p:ajax listener="#{basvuruBean.durumGuncelle(b)}" update=":hrForm:messages :hrForm:kpiPanel durumGrup" />
                                     <f:selectItem itemLabel="Bekliyor" itemValue="BEKLIYOR" />
                                     <f:selectItem itemLabel="İncelendi" itemValue="INCELENDI" />
                                     <f:selectItem itemLabel="Mülakata Çağrıldı" itemValue="MULAKATA_CAGRILDI" />
@@ -147,7 +153,7 @@
                                                  title="Başvuruyu Sil"
                                                  styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
                                                  actionListener="#{basvuruBean.basvuruSil(b)}"
-                                                 update=":hrForm"
+                                                 update=":hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages"
                                                  process="@this">
                                     <p:confirm header="Emin misiniz?"
                                                message="Bu başvuruyu silmek istediğinize emin misiniz?"
@@ -165,17 +171,19 @@
                         <div style="display:flex; gap:12px; margin-bottom:1rem; flex-wrap:wrap; align-items:flex-end;">
                             <div>
                                 <label style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Meslek</label>
-                                <p:inputText value="#{basvuruBean.aramaMeslek}" placeholder="Meslek ara..." style="width:200px;" />
+                                <p:inputText id="aramaMeslek" value="#{basvuruBean.aramaMeslek}" placeholder="Meslek ara..." style="width:200px;" />
                             </div>
                             <div>
                                 <label style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Şehir</label>
-                                <p:inputText value="#{basvuruBean.aramaSehir}" placeholder="Şehir ara..." style="width:200px;" />
+                                <p:inputText id="aramaSehir" value="#{basvuruBean.aramaSehir}" placeholder="Şehir ara..." style="width:200px;" />
                             </div>
                             <p:commandButton value="Ara" icon="pi pi-search"
                                              action="#{basvuruBean.adayAra}" update="adayHavuzTablosu"
+                                             process="@this aramaMeslek aramaSehir"
                                              styleClass="p-button-sm" />
                             <p:commandButton value="Temizle" icon="pi pi-filter-slash"
-                                             action="#{basvuruBean.filtreTemizle}" update="adayHavuzTablosu @parent"
+                                             action="#{basvuruBean.filtreTemizle}" update="adayHavuzTablosu aramaMeslek aramaSehir"
+                                             process="@this"
                                              styleClass="p-button-sm p-button-outlined" />
                         </div>
 
@@ -229,7 +237,7 @@
                                                  title="Adayı Sil"
                                                  styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
                                                  actionListener="#{basvuruBean.adaySil(aday)}"
-                                                 update=":hrForm"
+                                                 update=":hrForm:adayHavuzTablosu :hrForm:basvuruTablosu :hrForm:kpiPanel :hrForm:messages"
                                                  process="@this">
                                     <p:confirm header="Emin misiniz?"
                                                message="'#{aday.adSoyad}' adayını ve tüm başvurularını silmek istediğinize emin misiniz?"
@@ -250,9 +258,6 @@
                 <p:commandButton value="İptal" type="button"
                                  styleClass="ui-confirmdialog-no p-button-text p-button-sm" icon="pi pi-times"/>
             </p:confirmDialog>
-
-            <!-- KPI güncelleme için gizli panel -->
-            <p:outputPanel id="kpiPanel" />
 
         </h:form>
     </ui:define>
