@@ -6,7 +6,7 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 
 <h:head>
-    <title>OSB Panel — Login</title>
+    <title>OSB Panel — Giriş</title>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
@@ -21,6 +21,14 @@
         .login-field .p-inputtext { width: 100%; }
         .error-msg { background: #fee2e2; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; }
         .success-msg { background: #dcfce7; color: #15803d; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; }
+        .user-info-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
+        .user-info-table th { text-align: left; color: #64748b; padding: 4px 8px; font-weight: 500; border-bottom: 1px solid #e2e8f0; }
+        .user-info-table td { padding: 4px 8px; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+        .user-info-table td:last-child { color: #64748b; font-size: 0.75rem; }
+        .basvuru-link { display: block; text-align: center; margin-top: 1rem; padding: 0.75rem; background: #eff6ff; border-radius: 8px; }
+        .basvuru-link a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
+        .basvuru-link a:hover { text-decoration: underline; }
+        .basvuru-link p { margin: 0.25rem 0 0; color: #64748b; font-size: 0.8rem; }
     </style>
 </h:head>
 
@@ -29,7 +37,7 @@
         <div class="login-header">
             <i class="pi pi-building"/>
             <h2>OSB Management Panel</h2>
-            <p>Organized Industrial Zone Information System</p>
+            <p>Organize Sanayi Bölgesi Bilgi Sistemi</p>
         </div>
 
         <p:card>
@@ -38,45 +46,67 @@
                 <h:panelGroup rendered="#{not empty param['error']}">
                     <div class="error-msg">
                         <i class="pi pi-exclamation-circle"/>
-                        Invalid username or password.
+                        Geçersiz kullanıcı adı veya şifre.
                     </div>
                 </h:panelGroup>
 
                 <h:panelGroup rendered="#{not empty param['logout']}">
                     <div class="success-msg">
                         <i class="pi pi-check-circle"/>
-                        You have been logged out successfully.
+                        Başarıyla çıkış yapıldı.
                     </div>
                 </h:panelGroup>
 
                 <div class="login-field">
-                    <label for="username">Username</label>
+                    <label for="username">Kullanıcı Adı</label>
                     <input id="username" name="username" type="text"
-                           class="p-inputtext p-component" placeholder="Enter username"
+                           class="p-inputtext p-component" placeholder="Kullanıcı adınızı girin"
                            autocomplete="username"/>
                 </div>
 
                 <div class="login-field">
-                    <label for="password">Password</label>
+                    <label for="password">Şifre</label>
                     <input id="password" name="password" type="password"
-                           class="p-inputtext p-component" placeholder="Enter password"
+                           class="p-inputtext p-component" placeholder="Şifrenizi girin"
                            autocomplete="current-password"/>
                 </div>
 
                 <button type="submit" class="p-button p-component"
                         style="width:100%; margin-top:0.5rem; justify-content:center;">
                     <span class="p-button-icon p-button-icon-left pi pi-sign-in"></span>
-                    <span class="p-button-label">Sign In</span>
+                    <span class="p-button-label">Giriş Yap</span>
                 </button>
 
             </form>
 
             <f:facet name="footer">
-                <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin:0;">
-                    Default: admin / admin123
-                </p>
+                <table class="user-info-table">
+                    <tr>
+                        <th>Kullanıcı</th>
+                        <th>Şifre</th>
+                        <th>Rol</th>
+                    </tr>
+                    <tr>
+                        <td>operator</td>
+                        <td>operator123</td>
+                        <td>Operatör (Tam Yetki)</td>
+                    </tr>
+                    <tr>
+                        <td>isveren1</td>
+                        <td>isveren123</td>
+                        <td>İşveren (Kısıtlı)</td>
+                    </tr>
+                </table>
             </f:facet>
         </p:card>
+
+        <div class="basvuru-link">
+            <a href="/aday-basvuru.xhtml">
+                <i class="pi pi-user-plus" style="margin-right:4px;"/>
+                İş Arıyor musunuz? Başvuru Formuna Gidin
+            </a>
+            <p>Giriş yapmadan başvurunuzu oluşturabilirsiniz.</p>
+        </div>
     </div>
 </h:body>
 </html>

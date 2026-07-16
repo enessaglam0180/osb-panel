@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>AOSB Kariyer — Başvuru Formu</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: var(--font-family);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .basvuru-container {
+            width: 100%;
+            max-width: 640px;
+        }
+        .basvuru-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+        .basvuru-header .pi { font-size: 2.5rem; }
+        .basvuru-header h1 { margin: 0.5rem 0 0.25rem; font-size: 1.75rem; font-weight: 700; }
+        .basvuru-header p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 1.5rem 0 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .form-field { margin-bottom: 1rem; }
+        .form-field label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.35rem;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        .form-field .p-inputtext,
+        .form-field .p-selectonemenu,
+        .form-field .p-inputmask,
+        .form-field .p-inputnumber { width: 100%; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .success-panel {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        .success-panel .pi-check-circle {
+            font-size: 4rem;
+            color: #22c55e;
+            margin-bottom: 1rem;
+        }
+        .success-panel h2 {
+            color: #16a34a;
+            margin: 0 0 0.5rem;
+        }
+        .success-panel p {
+            color: #64748b;
+            margin: 0;
+        }
+        .login-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.85rem;
+        }
+        .login-link a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <div class="basvuru-container">
+
+        <div class="basvuru-header">
+            <i class="pi pi-briefcase"/>
+            <h1>AOSB Kariyer Portalı</h1>
+            <p>Adana Organize Sanayi Bölgesi İstihdam Başvuru Formu</p>
+        </div>
+
+        <p:card>
+            <h:form id="basvuruForm" enctype="multipart/form-data">
+                <p:growl id="messages" showDetail="false" life="5000" />
+
+                <!-- Başarılı mesaj paneli -->
+                <h:panelGroup rendered="#{adayBasvuruBean.basvuruBasarili}">
+                    <div class="success-panel">
+                        <i class="pi pi-check-circle"/>
+                        <h2>Başvurunuz Alındı!</h2>
+                        <p>En kısa sürede sizinle iletişime geçilecektir.</p>
+                        <p:button value="Yeni Başvuru Yap" outcome="/aday-basvuru.xhtml"
+                                  icon="pi pi-plus" styleClass="p-button-outlined p-button-sm"
+                                  style="margin-top: 1.5rem;" />
+                    </div>
+                </h:panelGroup>
+
+                <!-- Başvuru Formu -->
+                <h:panelGroup rendered="#{!adayBasvuruBean.basvuruBasarili}">
+
+                    <div class="form-section-title">
+                        <i class="pi pi-user" style="margin-right: 6px;"/>
+                        Kişisel Bilgiler
+                    </div>
+
+                    <div class="form-field">
+                        <label for="isim">Ad Soyad *</label>
+                        <p:inputText id="isim" value="#{adayBasvuruBean.adSoyad}"
+                                     required="true" requiredMessage="Ad Soyad zorunludur."
+                                     placeholder="Adınız ve soyadınız" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="email">E-posta *</label>
+                            <p:inputText id="email" value="#{adayBasvuruBean.eposta}"
+                                         required="true" requiredMessage="E-posta zorunludur."
+                                         placeholder="ornek@mail.com" />
+                        </div>
+                        <div class="form-field">
+                            <label for="tel">Telefon</label>
+                            <p:inputMask id="tel" value="#{adayBasvuruBean.telefon}" mask="(999) 999 9999" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="sehir">Şehir</label>
+                            <p:inputText id="sehir" value="#{adayBasvuruBean.sehir}"
+                                         placeholder="İkamet ettiğiniz şehir" />
+                        </div>
+                        <div class="form-field">
+                            <label for="egitim">Eğitim Durumu</label>
+                            <p:selectOneMenu id="egitim" value="#{adayBasvuruBean.egitimDurumu}" style="width:100%">
+                                <f:selectItem itemLabel="— Seçiniz —" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItem itemLabel="İlköğretim" itemValue="İlköğretim"/>
+                                <f:selectItem itemLabel="Lise" itemValue="Lise"/>
+                                <f:selectItem itemLabel="Meslek Yüksekokulu" itemValue="Meslek Yüksekokulu"/>
+                                <f:selectItem itemLabel="Lisans" itemValue="Lisans"/>
+                                <f:selectItem itemLabel="Yüksek Lisans" itemValue="Yüksek Lisans"/>
+                                <f:selectItem itemLabel="Doktora" itemValue="Doktora"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="pi pi-briefcase" style="margin-right: 6px;"/>
+                        Mesleki Bilgiler
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="meslek">Meslek / Uzmanlık</label>
+                            <p:inputText id="meslek" value="#{adayBasvuruBean.meslek}"
+                                         placeholder="Örn: CNC Operatörü" />
+                        </div>
+                        <div class="form-field">
+                            <label for="deneyim">Deneyim (Yıl)</label>
+                            <p:inputNumber id="deneyim" value="#{adayBasvuruBean.deneyimYili}"
+                                           minValue="0" maxValue="50" decimalPlaces="0"
+                                           placeholder="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="ilan">Başvurulacak İlan (İsteğe Bağlı)</label>
+                        <p:selectOneMenu id="ilan" value="#{adayBasvuruBean.secilenIlanId}">
+                            <f:selectItem itemLabel="— Genel Havuza Başvur —" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{adayBasvuruBean.aktifIlanlar}" var="i"
+                                           itemLabel="#{i.baslik} (#{i.sanayici.companyName})" itemValue="#{i.id}" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="pi pi-file" style="margin-right: 6px;"/>
+                        CV Yükleme
+                    </div>
+
+                    <div class="form-field">
+                        <p:fileUpload value="#{adayBasvuruBean.cvDosyasi}" mode="simple"
+                                      skinSimple="true" accept=".pdf,.doc,.docx"
+                                      label="CV Dosyası Seçin" />
+                        <small style="color: #94a3b8; margin-top: 4px; display: block;">
+                            PDF, DOC veya DOCX formatında, maksimum 10 MB
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <p:commandButton value="Başvuruyu Gönder"
+                                         action="#{adayBasvuruBean.basvuruYap}"
+                                         icon="pi pi-send"
+                                         styleClass="p-button-success"
+                                         style="width: 100%;"
+                                         ajax="false" />
+                    </div>
+
+                </h:panelGroup>
+            </h:form>
+
+            <f:facet name="footer">
+                <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin:0;">
+                    © 2026 AOSB — Adana Organize Sanayi Bölgesi
+                </p>
+            </f:facet>
+        </p:card>
+
+        <div class="login-link">
+            İşveren veya Operatör müsünüz?
+            <a href="/login.xhtml">Giriş Yapın</a>
+        </div>
+    </div>
+</h:body>
+</html>

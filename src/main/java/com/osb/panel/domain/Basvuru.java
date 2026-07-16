@@ -14,8 +14,9 @@ public class Basvuru {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // İş ilanı nullable — aday havuzuna direkt başvuru da olabilir
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "is_ilani_id", nullable = false)
+    @JoinColumn(name = "is_ilani_id")
     private IsIlani isIlani;
 
     @ManyToOne(fetch = FetchType.EAGER)

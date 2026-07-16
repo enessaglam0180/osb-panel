@@ -4,7 +4,8 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:sec="http://www.springframework.org/security/tags">
 
 <h:head>
     <f:facet name="first">
@@ -24,13 +25,22 @@
                 OSB Management Panel
             </span>
         </f:facet>
-        <p:menuitem value="Dashboard"    url="/dashboard.xhtml" icon="pi pi-home"/>
-        <p:menuitem value="Companies"    url="/index.xhtml"     icon="pi pi-building"/>
-        <p:menuitem value="İK ve Kariyer" url="/ik-paneli.xhtml" icon="pi pi-briefcase"/>
+
+        <!-- Operatör menüsü — tüm sayfalar -->
+        <p:menuitem value="Dashboard"     url="/dashboard.xhtml"       icon="pi pi-home"      rendered="#{request.isUserInRole('ROLE_OPERATOR')}" />
+        <p:menuitem value="Companies"     url="/index.xhtml"           icon="pi pi-building"   rendered="#{request.isUserInRole('ROLE_OPERATOR')}" />
+        <p:menuitem value="İK Yönetimi"   url="/ik-paneli.xhtml"       icon="pi pi-briefcase"  rendered="#{request.isUserInRole('ROLE_OPERATOR')}" />
+        <p:menuitem value="Aday Havuzu"   url="/isveren-paneli.xhtml"  icon="pi pi-users"      rendered="#{request.isUserInRole('ROLE_OPERATOR')}" />
+
+        <!-- İşveren menüsü — sadece aday havuzu -->
+        <p:menuitem value="Aday Havuzu"   url="/isveren-paneli.xhtml"  icon="pi pi-users"      rendered="#{request.isUserInRole('ROLE_ISVEREN')}" />
+
         <f:facet name="end">
-            <p:link value="Logout" href="/logout" styleClass="p-button p-button-text p-button-sm">
-                <span class="pi pi-sign-out" style="margin-right:4px;"/>
-            </p:link>
+            <span style="display:flex; align-items:center; gap:8px;">
+                <p:link value="Logout" href="/logout" styleClass="p-button p-button-text p-button-sm">
+                    <span class="pi pi-sign-out" style="margin-right:4px;"/>
+                </p:link>
+            </span>
         </f:facet>
     </p:menubar>
 

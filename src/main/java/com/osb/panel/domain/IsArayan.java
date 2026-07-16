@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "is_arayan")
-@Getter @Setter
+@Getter
+@Setter
 public class IsArayan {
 
     @Id
@@ -26,7 +27,15 @@ public class IsArayan {
     @Column(length = 100)
     private String meslek;
 
-    // KRİTİK: CV dosyası veritabanında değil, sunucuda duracak. Burada sadece dosya adı/yolu olacak.
+    @Column(name = "deneyim_yili")
+    private Integer deneyimYili;
+
+    @Column(name = "egitim_durumu", length = 100)
+    private String egitimDurumu;
+
+    @Column(length = 80)
+    private String sehir;
+
     @Column(name = "cv_dosya_yolu", length = 255)
     private String cvDosyaYolu;
 

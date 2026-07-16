@@ -1,9 +1,11 @@
 package com.osb.panel.config;
 
 import com.osb.panel.domain.*;
+import com.osb.panel.domain.Kullanici.Rol;
 import com.osb.panel.domain.Sanayici.Durum;
-import com.osb.panel.service.SanayiciService;
 import com.osb.panel.repository.*;
+import com.osb.panel.service.KullaniciService;
+import com.osb.panel.service.SanayiciService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +18,40 @@ public class DataLoader implements CommandLineRunner {
     private final IsIlaniRepository isIlaniRepository;
     private final IsArayanRepository isArayanRepository;
     private final BasvuruRepository basvuruRepository;
+    private final KullaniciService kullaniciService;
 
     public DataLoader(SanayiciService service,
                       IsIlaniRepository isIlaniRepository,
                       IsArayanRepository isArayanRepository,
-                      BasvuruRepository basvuruRepository) {
+                      BasvuruRepository basvuruRepository,
+                      KullaniciService kullaniciService) {
         this.service = service;
         this.isIlaniRepository = isIlaniRepository;
         this.isArayanRepository = isArayanRepository;
         this.basvuruRepository = basvuruRepository;
+        this.kullaniciService = kullaniciService;
     }
 
     @Override
     public void run(String... args) {
 
-        // --- 1. SANAYİCİ VERİLERİ KONTROLÜ ---
+        // --- 1. KULLANICI VERİLERİ KONTROLÜ ---
+        if (!kullaniciService.existsByKullaniciAdi("operator")) {
+            kullaniciService.kaydet("operator", "operator123", "Sistem Operatörü", "operator@osb.com", Rol.OPERATOR);
+            System.out.println("Operatör kullanıcısı oluşturuldu. (operator / operator123)");
+        }
+
+        if (!kullaniciService.existsByKullaniciAdi("isveren1")) {
+            kullaniciService.kaydet("isveren1", "isveren123", "Yıldız Tekstil İK", "ik@yildiz.com", Rol.ISVEREN);
+            System.out.println("İşveren kullanıcısı oluşturuldu. (isveren1 / isveren123)");
+        }
+
+        if (!kullaniciService.existsByKullaniciAdi("isveren2")) {
+            kullaniciService.kaydet("isveren2", "isveren123", "Güneş Gıda İK", "ik@gunes.com", Rol.ISVEREN);
+            System.out.println("İşveren kullanıcısı oluşturuldu. (isveren2 / isveren123)");
+        }
+
+        // --- 2. SANAYİCİ VERİLERİ KONTROLÜ ---
         if (service.countAll() == 0) {
             service.save(build("Yıldız Tekstil A.Ş.",      "1234567890", "Ali Yıldız",     "0532 111 2233", "ali@yildiz.com",     "Textile",   Durum.ACTIVE,    42500));
             service.save(build("Güneş Gıda Sanayi Ltd.",    "9876543210", "Fatma Demir",    "0533 222 3344", "fatma@gunes.com",    "Food",      Durum.ACTIVE,    18000));
@@ -47,33 +68,83 @@ public class DataLoader implements CommandLineRunner {
             System.out.println("Veritabanı zaten dolu, Sanayici verileri eklenmeyecek...");
         }
 
-        // --- 2. İK MODÜLÜ VERİLERİ KONTROLÜ ---
+        // --- 3. İK MODÜLÜ VERİLERİ KONTROLÜ ---
         if (isIlaniRepository.count() == 0) {
             List<Sanayici> firmalar = service.findAll();
 
             // Eğer sistemde hiç firma yoksa, boşluğa ilan açamayız, güvenlik kontrolü yapalım.
             if (!firmalar.isEmpty()) {
-                Sanayici firma = firmalar.get(0); // İlk firmayı al
+                Sanayici firma1 = firmalar.get(0);
+                Sanayici firma2 = firmalar.size() > 1 ? firmalar.get(1) : firma1;
 
-                IsIlani ilan = new IsIlani();
-                ilan.setSanayici(firma);
-                ilan.setBaslik("Java Spring Boot Geliştirici");
-                ilan.setAciklama("AOSB sistemlerimiz için tam zamanlı backend geliştirici aranmaktadır.");
-                isIlaniRepository.save(ilan);
+                IsIlani ilan1 = new IsIlani();
+                ilan1.setSanayici(firma1);
+                ilan1.setBaslik("Java Spring Boot Geliştirici");
+                ilan1.setAciklama("AOSB sistemlerimiz için tam zamanlı backend geliştirici aranmaktadır.");
+                isIlaniRepository.save(ilan1);
 
-                IsArayan aday = new IsArayan();
-                aday.setAdSoyad("Mahmut Enes");
-                aday.setEposta("enes@example.com");
-                aday.setTelefon("0555 999 8877");
-                aday.setMeslek("Bilgisayar Mühendisi");
-                aday.setCvDosyaYolu("/uploads/cv/mahmut_enes_cv.pdf");
-                isArayanRepository.save(aday);
+                IsIlani ilan2 = new IsIlani();
+                ilan2.setSanayici(firma2);
+                ilan2.setBaslik("CNC Operatörü");
+                ilan2.setAciklama("Üretim hattı için deneyimli CNC operatörü aranmaktadır. En az 3 yıl tecrübe.");
+                isIlaniRepository.save(ilan2);
 
-                Basvuru basvuru = new Basvuru();
-                basvuru.setIsIlani(ilan);
-                basvuru.setIsArayan(aday);
-                basvuru.setBasvuruDurumu(Basvuru.BasvuruDurumu.BEKLIYOR);
-                basvuruRepository.save(basvuru);
+                IsIlani ilan3 = new IsIlani();
+                ilan3.setSanayici(firma1);
+                ilan3.setBaslik("Kalite Kontrol Mühendisi");
+                ilan3.setAciklama("ISO 9001 standartlarına hakim kalite kontrol mühendisi aranmaktadır.");
+                isIlaniRepository.save(ilan3);
+
+                IsArayan aday1 = new IsArayan();
+                aday1.setAdSoyad("Mahmut Enes");
+                aday1.setEposta("enes@example.com");
+                aday1.setTelefon("0555 999 8877");
+                aday1.setMeslek("Bilgisayar Mühendisi");
+                aday1.setDeneyimYili(5);
+                aday1.setEgitimDurumu("Lisans");
+                aday1.setSehir("Adana");
+                aday1.setCvDosyaYolu("/uploads/cv/mahmut_enes_cv.pdf");
+                isArayanRepository.save(aday1);
+
+                IsArayan aday2 = new IsArayan();
+                aday2.setAdSoyad("Ayşe Yılmaz");
+                aday2.setEposta("ayse.yilmaz@example.com");
+                aday2.setTelefon("0544 123 4567");
+                aday2.setMeslek("CNC Operatörü");
+                aday2.setDeneyimYili(8);
+                aday2.setEgitimDurumu("Meslek Yüksekokulu");
+                aday2.setSehir("Mersin");
+                aday2.setCvDosyaYolu("/uploads/cv/ayse_yilmaz_cv.pdf");
+                isArayanRepository.save(aday2);
+
+                IsArayan aday3 = new IsArayan();
+                aday3.setAdSoyad("Mehmet Kara");
+                aday3.setEposta("mehmet.kara@example.com");
+                aday3.setTelefon("0533 987 6543");
+                aday3.setMeslek("Kalite Kontrol Mühendisi");
+                aday3.setDeneyimYili(3);
+                aday3.setEgitimDurumu("Lisans");
+                aday3.setSehir("Adana");
+                aday3.setCvDosyaYolu("/uploads/cv/mehmet_kara_cv.pdf");
+                isArayanRepository.save(aday3);
+
+                Basvuru basvuru1 = new Basvuru();
+                basvuru1.setIsIlani(ilan1);
+                basvuru1.setIsArayan(aday1);
+                basvuru1.setBasvuruDurumu(Basvuru.BasvuruDurumu.BEKLIYOR);
+                basvuruRepository.save(basvuru1);
+
+                Basvuru basvuru2 = new Basvuru();
+                basvuru2.setIsIlani(ilan2);
+                basvuru2.setIsArayan(aday2);
+                basvuru2.setBasvuruDurumu(Basvuru.BasvuruDurumu.INCELENDI);
+                basvuruRepository.save(basvuru2);
+
+                Basvuru basvuru3 = new Basvuru();
+                basvuru3.setIsIlani(ilan3);
+                basvuru3.setIsArayan(aday3);
+                basvuru3.setBasvuruDurumu(Basvuru.BasvuruDurumu.BEKLIYOR);
+                basvuruRepository.save(basvuru3);
 
                 System.out.println("İK Modülü tohum verileri eklendi.");
             }

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">İşveren Paneli</ui:define>
+
+    <ui:define name="content">
+        <h:form id="isverenForm">
+
+            <p:growl id="messages" showDetail="false" life="4000" />
+
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Aday Havuzu</h1>
+                    <p class="page-subtitle">
+                        Hoş geldiniz, <strong>#{isverenBean.girisYapanIsveren.adSoyad}</strong>.
+                        Aday havuzundan ilgilendiğiniz adayları inceleyebilir ve seçebilirsiniz.
+                    </p>
+                </div>
+            </div>
+
+            <p:card>
+                <p:tabView dynamic="true" cache="true">
+
+                    <!-- ===== TAB 1: ADAY HAVUZU ===== -->
+                    <p:tab title="Aday Havuzu" icon="pi pi-users">
+
+                        <!-- Arama/Filtreleme -->
+                        <div style="display:flex; gap:12px; margin-bottom:1rem; flex-wrap:wrap; align-items:flex-end;">
+                            <div>
+                                <label style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Meslek</label>
+                                <p:inputText value="#{isverenBean.aramaMeslek}" placeholder="Meslek ara..." style="width:200px;" />
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.85rem; font-weight:500; color:#64748b; margin-bottom:4px;">Şehir</label>
+                                <p:inputText value="#{isverenBean.aramaSehir}" placeholder="Şehir ara..." style="width:200px;" />
+                            </div>
+                            <p:commandButton value="Ara" icon="pi pi-search"
+                                             action="#{isverenBean.ara}" update="adayTablosu"
+                                             styleClass="p-button-sm" />
+                            <p:commandButton value="Temizle" icon="pi pi-filter-slash"
+                                             action="#{isverenBean.filtreTemizle}" update="adayTablosu @parent"
+                                             styleClass="p-button-sm p-button-outlined" />
+                        </div>
+
+                        <p:dataTable id="adayTablosu" var="aday" value="#{isverenBean.adayHavuzu}"
+                                     emptyMessage="Aday bulunamadı."
+                                     paginator="true" rows="10" rowHover="true" styleClass="p-datatable-sm"
+                                     sortBy="#{aday.kayitTarihi}" sortOrder="descending">
+
+                            <p:column headerText="Aday" sortBy="#{aday.adSoyad}" filterBy="#{aday.adSoyad}" filterMatchMode="contains" style="min-width:180px;">
+                                <h:outputText value="#{aday.adSoyad}" style="font-weight: bold;"/>
+                                <br/>
+                                <h:outputText value="#{aday.meslek}" style="font-size: 0.85em; color: gray;"/>
+                            </p:column>
+
+                            <p:column headerText="Şehir" sortBy="#{aday.sehir}" style="width:100px;">
+                                <h:outputText value="#{aday.sehir}" />
+                            </p:column>
+
+                            <p:column headerText="Eğitim" style="width:140px;">
+                                <h:outputText value="#{aday.egitimDurumu}" />
+                            </p:column>
+
+                            <p:column headerText="Deneyim" sortBy="#{aday.deneyimYili}" style="width:90px; text-align:center;">
+                                <h:outputText value="#{aday.deneyimYili} yıl" rendered="#{aday.deneyimYili != null}" />
+                                <h:outputText value="-" rendered="#{aday.deneyimYili == null}" style="color:#94a3b8;" />
+                            </p:column>
+
+                            <p:column headerText="İletişim" style="width:200px;">
+                                <h:outputText value="#{aday.eposta}" />
+                                <br/>
+                                <h:outputText value="#{aday.telefon}" style="font-size:0.85em; color:gray;" />
+                            </p:column>
+
+                            <p:column headerText="CV" style="width:60px; text-align:center;">
+                                <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
+                                                 styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
+                                                 ajax="false"
+                                                 rendered="#{aday.cvDosyaYolu != null}">
+                                    <p:fileDownload value="#{isverenBean.cvIndir(aday)}" />
+                                </p:commandButton>
+                            </p:column>
+
+                            <p:column headerText="İşlem" style="width:100px; text-align:center;">
+                                <p:commandButton icon="pi pi-heart"
+                                                 title="Bu Adayı Seç"
+                                                 styleClass="p-button-rounded p-button-sm"
+                                                 style="#{isverenBean.adayZatenSecilmisMi(aday) ? 'background:#22c55e; border-color:#22c55e;' : ''}"
+                                                 actionListener="#{isverenBean.adaySecmeHazirla(aday)}"
+                                                 oncomplete="PF('secimDialog').show()"
+                                                 update=":isverenForm:secimDialogContent"
+                                                 process="@this"
+                                                 disabled="#{isverenBean.adayZatenSecilmisMi(aday)}" />
+                            </p:column>
+
+                        </p:dataTable>
+                    </p:tab>
+
+                    <!-- ===== TAB 2: SEÇİLEN ADAYLARIM ===== -->
+                    <p:tab title="Seçtiklerim" icon="pi pi-heart">
+
+                        <p:dataTable id="secimTablosu" var="s" value="#{isverenBean.secimlerim}"
+                                     emptyMessage="Henüz aday seçmediniz."
+                                     paginator="true" rows="10" rowHover="true" styleClass="p-datatable-sm">
+
+                            <p:column headerText="Aday" sortBy="#{s.isArayan.adSoyad}" style="min-width:180px;">
+                                <h:outputText value="#{s.isArayan.adSoyad}" style="font-weight: bold;"/>
+                                <br/>
+                                <h:outputText value="#{s.isArayan.meslek}" style="font-size: 0.85em; color: gray;"/>
+                            </p:column>
+
+                            <p:column headerText="İletişim" style="width:200px;">
+                                <h:outputText value="#{s.isArayan.eposta}" />
+                                <br/>
+                                <h:outputText value="#{s.isArayan.telefon}" style="font-size:0.85em; color:gray;" />
+                            </p:column>
+
+                            <p:column headerText="Şehir" style="width:100px;">
+                                <h:outputText value="#{s.isArayan.sehir}" />
+                            </p:column>
+
+                            <p:column headerText="Notlarım" style="min-width:150px;">
+                                <h:outputText value="#{s.notlar}" style="font-style:italic; color:#64748b;" />
+                            </p:column>
+
+                            <p:column headerText="Seçim Tarihi" sortBy="#{s.secimTarihi}" style="width:130px;">
+                                <h:outputText value="#{s.secimTarihi}">
+                                    <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="CV" style="width:60px; text-align:center;">
+                                <p:commandButton icon="pi pi-file-pdf" title="CV İndir"
+                                                 styleClass="ui-button-outlined ui-button-secondary rounded-button p-button-sm"
+                                                 ajax="false"
+                                                 rendered="#{s.isArayan.cvDosyaYolu != null}">
+                                    <p:fileDownload value="#{isverenBean.cvIndir(s.isArayan)}" />
+                                </p:commandButton>
+                            </p:column>
+
+                            <p:column headerText="" style="width:60px; text-align:center;">
+                                <p:commandButton icon="pi pi-times"
+                                                 title="Seçimi Kaldır"
+                                                 styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
+                                                 actionListener="#{isverenBean.secimKaldir(s)}"
+                                                 update=":isverenForm:secimTablosu :isverenForm:adayTablosu"
+                                                 process="@this">
+                                    <p:confirm header="Emin misiniz?"
+                                               message="Bu adayın seçimini kaldırmak istediğinize emin misiniz?"
+                                               icon="pi pi-exclamation-triangle"/>
+                                </p:commandButton>
+                            </p:column>
+
+                        </p:dataTable>
+                    </p:tab>
+                </p:tabView>
+            </p:card>
+
+            <!-- Aday Seçim Dialog -->
+            <p:dialog header="Aday Seçimi" widgetVar="secimDialog" modal="true"
+                      resizable="false" width="420" styleClass="record-dialog">
+                <p:outputPanel id="secimDialogContent">
+                    <h:panelGroup rendered="#{isverenBean.secilenAday ne null}">
+                        <div style="padding: 1rem 0;">
+                            <p style="margin:0 0 0.5rem;">
+                                <strong>#{isverenBean.secilenAday.adSoyad}</strong> adayını seçmek üzeresiniz.
+                            </p>
+                            <label style="display:block; font-weight:500; margin-bottom:4px; font-size:0.9rem;">
+                                Not Ekleyin (isteğe bağlı):
+                            </label>
+                            <p:inputTextarea value="#{isverenBean.secimNotu}" rows="3"
+                                             style="width:100%;" placeholder="Bu aday hakkında notunuz..." />
+                        </div>
+                    </h:panelGroup>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Seç" icon="pi pi-heart"
+                                     action="#{isverenBean.adaySec}"
+                                     update=":isverenForm:adayTablosu :isverenForm:secimTablosu :isverenForm:messages"
+                                     oncomplete="PF('secimDialog').hide()"
+                                     styleClass="p-button-sm p-button-success" />
+                    <p:commandButton value="İptal" icon="pi pi-times"
+                                     onclick="PF('secimDialog').hide()" type="button"
+                                     styleClass="p-button-sm p-button-text" style="margin-left:8px;" />
+                </f:facet>
+            </p:dialog>
+
+            <!-- Global confirm dialog -->
+            <p:confirmDialog global="true" showEffect="fade" style="width:380px;">
+                <p:commandButton value="Evet" type="button"
+                                 styleClass="ui-confirmdialog-yes p-button-danger p-button-sm" icon="pi pi-check"/>
+                <p:commandButton value="İptal" type="button"
+                                 styleClass="ui-confirmdialog-no p-button-text p-button-sm" icon="pi pi-times"/>
+            </p:confirmDialog>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
