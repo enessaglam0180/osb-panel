@@ -74,13 +74,33 @@ public class AdayBasvuruBean implements Serializable {
                 return;
             }
 
-            // CV'yi kaydet
-            String dosyaYolu = fileStorageService.cvKaydet(cvDosyasi.getFileName(), cvDosyasi.getInputStream());
-
             // Aynı e-posta ile kayıtlı aday var mı kontrol et
             IsArayan aday = isArayanRepository.findByEposta(eposta.trim()).orElse(null);
 
+            // Mükerrer başvuru kontrolü
             if (aday != null) {
+                boolean zatenBasvurdu = false;
+                if (secilenIlanId != null) {
+                    zatenBasvurdu = basvuruRepository.existsByIsArayanIdAndIsIlaniId(aday.getId(), secilenIlanId);
+                } else {
+                    zatenBasvurdu = basvuruRepository.existsByIsArayanIdAndIsIlaniIsNull(aday.getId());
+                }
+                
+                if (zatenBasvurdu) {
+                    addMessage(FacesMessage.SEVERITY_WARN, "Bu ilana (veya genel havuza) daha önce başvuru yaptınız.");
+                    return;
+                }
+            }
+
+            // CV'yi kaydet
+            String dosyaYolu = fileStorageService.cvKaydet(cvDosyasi.getFileName(), cvDosyasi.getInputStream());
+
+            if (aday != null) {
+                // Eski CV'yi diskten sil
+                if (aday.getCvDosyaYolu() != null) {
+                    fileStorageService.cvSil(aday.getCvDosyaYolu());
+                }
+
                 // Mevcut adayın bilgilerini güncelle ve yeni CV'sini kaydet
                 aday.setAdSoyad(adSoyad.trim());
                 aday.setTelefon(telefon);

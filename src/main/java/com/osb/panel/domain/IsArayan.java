@@ -39,6 +39,12 @@ public class IsArayan {
     @Column(name = "cv_dosya_yolu", length = 255)
     private String cvDosyaYolu;
 
+    @Column(name = "mulakata_cagrildi_mi")
+    private Boolean mulakataCagrildiMi = false;
+
+    @Column(name = "durum", length = 500)
+    private String durum;
+
     @Column(name = "kayit_tarihi", updatable = false)
     private LocalDateTime kayitTarihi;
 

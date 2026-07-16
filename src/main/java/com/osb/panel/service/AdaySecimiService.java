@@ -48,4 +48,9 @@ public class AdaySecimiService {
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
+
+    @Transactional
+    public void deleteByIsArayanId(Long isArayanId) {
+        repository.deleteByIsArayanId(isArayanId);
+    }
 }

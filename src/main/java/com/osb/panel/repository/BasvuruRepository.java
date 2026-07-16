@@ -13,4 +13,8 @@ public interface BasvuruRepository extends JpaRepository<Basvuru, Long> {
     List<Basvuru> findByIsArayanId(Long isArayanId);
 
     long countByBasvuruDurumu(BasvuruDurumu durumu);
+
+    boolean existsByIsArayanIdAndIsIlaniId(Long isArayanId, Long isIlaniId);
+
+    boolean existsByIsArayanIdAndIsIlaniIsNull(Long isArayanId);
 }

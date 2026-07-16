@@ -10,6 +10,7 @@ import com.osb.panel.domain.IsIlani;
 import com.osb.panel.repository.BasvuruRepository;
 import com.osb.panel.repository.IsIlaniRepository;
 import com.osb.panel.service.IsArayanService;
+import com.osb.panel.service.AdaySecimiService;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -36,7 +37,11 @@ public class BasvuruBean implements Serializable {
     @Autowired
     private transient IsArayanService isArayanService;
     @Autowired
+    private transient AdaySecimiService adaySecimiService;
+    @Autowired
     private transient BasvuruRepository basvuruRepository;
+    @Autowired
+    private transient com.osb.panel.service.FileStorageService fileStorageService;
 
     @Getter private List<IsIlani> aktifIlanlar;
     @Getter private List<Basvuru> tumBasvurular;
@@ -86,8 +91,48 @@ public class BasvuruBean implements Serializable {
     // İK Yöneticisi başvuru durumunu değiştirdiğinde çalışır
     public void durumGuncelle(Basvuru basvuru) {
         basvuruRepository.save(basvuru);
+        
+        
+        IsArayan aday = basvuru.getIsArayan();
+        String ilanBaslik = basvuru.getIsIlani() != null ? basvuru.getIsIlani().getBaslik() : "Genel Başvuru";
+        
+        if (basvuru.getBasvuruDurumu() == Basvuru.BasvuruDurumu.MULAKATA_CAGRILDI) {
+            aday.setMulakataCagrildiMi(true);
+            aday.setDurum("Mülakata Çağrıldı (" + ilanBaslik + ")");
+        } else if (basvuru.getBasvuruDurumu() == Basvuru.BasvuruDurumu.REDDEDILDI) {
+            aday.setDurum("Reddedildi (" + ilanBaslik + ")");
+        } else if (basvuru.getBasvuruDurumu() == Basvuru.BasvuruDurumu.INCELENDI) {
+            aday.setDurum("İncelendi (" + ilanBaslik + ")");
+        } else {
+            aday.setDurum("Bekliyor (" + ilanBaslik + ")");
+        }
+        isArayanService.save(aday);
+        
         istatistikleriGuncelle();
-        addMessage(FacesMessage.SEVERITY_INFO, "Adayın başvuru durumu güncellendi.");
+        addMessage(FacesMessage.SEVERITY_INFO, "Başvuru durumu güncellendi ve Aday Havuzu ile senkronize edildi.");
+    }
+
+    // Aday bilgilerini güncellediğinde çalışır
+    public void adayGuncelle(IsArayan aday) {
+        isArayanService.save(aday);
+        
+        // Senkronizasyon: Aday mülakata çağrıldıysa, beklemedeki başvurularını da Mülakata Çağrıldı yap
+        if (Boolean.TRUE.equals(aday.getMulakataCagrildiMi())) {
+            List<Basvuru> basvurular = basvuruRepository.findByIsArayanId(aday.getId());
+            boolean degisiklik = false;
+            for (Basvuru b : basvurular) {
+                if (b.getBasvuruDurumu() == Basvuru.BasvuruDurumu.BEKLIYOR || b.getBasvuruDurumu() == Basvuru.BasvuruDurumu.INCELENDI) {
+                    b.setBasvuruDurumu(Basvuru.BasvuruDurumu.MULAKATA_CAGRILDI);
+                    basvuruRepository.save(b);
+                    degisiklik = true;
+                }
+            }
+            if (degisiklik) {
+                yukle(); // Tüm listeyi güncellemek için
+            }
+        }
+        
+        addMessage(FacesMessage.SEVERITY_INFO, "Aday bilgileri güncellendi ve başvurularla senkronize edildi.");
     }
 
     // Operatör adayı siler
@@ -97,8 +142,17 @@ public class BasvuruBean implements Serializable {
             List<Basvuru> adayBasvurulari = basvuruRepository.findByIsArayanId(aday.getId());
             basvuruRepository.deleteAll(adayBasvurulari);
 
+            // İşverenlerin bu adayı seçtikleri kayıtları (AdaySecimi) sil
+            adaySecimiService.deleteByIsArayanId(aday.getId());
+
             // Sonra adayı sil
             isArayanService.deleteById(aday.getId());
+            
+            // Fiziksel CV'sini sil
+            if (aday.getCvDosyaYolu() != null) {
+                fileStorageService.cvSil(aday.getCvDosyaYolu());
+            }
+
             yukle();
             addMessage(FacesMessage.SEVERITY_WARN, aday.getAdSoyad() + " adayı silindi.");
         } catch (Exception e) {

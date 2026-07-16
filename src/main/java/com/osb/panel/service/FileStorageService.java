@@ -47,4 +47,21 @@ public class FileStorageService {
             throw new RuntimeException("Dosya diske yazılamadı: " + e.getMessage());
         }
     }
+
+    public boolean cvSil(String dosyaYolu) {
+        try {
+            if (dosyaYolu == null || dosyaYolu.trim().isEmpty()) {
+                return false;
+            }
+            
+            // "/uploads/cv/dosyaadi.pdf" formatındaki yoldan sadece dosya adını al
+            String dosyaAdi = dosyaYolu.substring(dosyaYolu.lastIndexOf("/") + 1);
+            Path hedefYer = this.rootLocation.resolve(dosyaAdi);
+            
+            return Files.deleteIfExists(hedefYer);
+        } catch (IOException e) {
+            System.err.println("Dosya silinirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
 }

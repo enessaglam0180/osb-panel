@@ -14,4 +14,6 @@ public interface AdaySecimiRepository extends JpaRepository<AdaySecimi, Long> {
     boolean existsByIsverenIdAndIsArayanId(Long isverenId, Long isArayanId);
 
     void deleteByIsverenIdAndIsArayanId(Long isverenId, Long isArayanId);
+
+    void deleteByIsArayanId(Long isArayanId);
 }
